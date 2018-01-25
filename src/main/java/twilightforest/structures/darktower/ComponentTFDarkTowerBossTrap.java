@@ -6,23 +6,24 @@ import net.minecraft.util.Rotation;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.block.BlockTFTowerDevice;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.util.RotationUtil;
 
 import java.util.List;
 import java.util.Random;
 
-import static twilightforest.block.enums.TowerDeviceVariant.GHASTTRAP_INACTIVE;
+import static twilightforest.enums.TowerDeviceVariant.GHASTTRAP_INACTIVE;
 
 public class ComponentTFDarkTowerBossTrap extends ComponentTFDarkTowerWing {
 
 	public ComponentTFDarkTowerBossTrap() {
 	}
 
-	protected ComponentTFDarkTowerBossTrap(int i, int x, int y, int z, int pSize, int pHeight, EnumFacing direction) {
-		super(i, x, y, z, pSize, pHeight, direction);
+	protected ComponentTFDarkTowerBossTrap(TFFeature feature, int i, int x, int y, int z, int pSize, int pHeight, EnumFacing direction) {
+		super(feature, i, x, y, z, pSize, pHeight, direction);
 
 		// no spawns
 		this.spawnListIndex = -1;
@@ -30,8 +31,8 @@ public class ComponentTFDarkTowerBossTrap extends ComponentTFDarkTowerWing {
 
 	@Override
 	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 
 		// we should have a door where we started

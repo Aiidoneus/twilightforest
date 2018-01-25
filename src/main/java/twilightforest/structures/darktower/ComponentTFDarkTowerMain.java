@@ -18,17 +18,18 @@ import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraftforge.fml.common.FMLLog;
+import twilightforest.TFFeature;
 import twilightforest.TFTreasure;
+import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFBossSpawner;
 import twilightforest.block.BlockTFLog;
 import twilightforest.block.BlockTFTowerDevice;
 import twilightforest.block.TFBlocks;
-import twilightforest.block.enums.BossVariant;
-import twilightforest.block.enums.TowerDeviceVariant;
-import twilightforest.block.enums.WoodVariant;
+import twilightforest.enums.BossVariant;
+import twilightforest.enums.TowerDeviceVariant;
+import twilightforest.enums.WoodVariant;
 import twilightforest.item.TFItems;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.StructureTFDecorator;
 import twilightforest.structures.TFMaze;
 import twilightforest.util.RotationUtil;
@@ -53,22 +54,22 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 	}
 
 
-	public ComponentTFDarkTowerMain(World world, Random rand, int index, int x, int y, int z)
+	public ComponentTFDarkTowerMain(TFFeature feature, World world, Random rand, int index, int x, int y, int z)
 	{
-		this(world, rand, index, x + 10, y, z + 10, EnumFacing.NORTH);
+		this(feature, world, rand, index, x + 10, y, z + 10, EnumFacing.NORTH);
 	}
 
 
-	public ComponentTFDarkTowerMain(World world, Random rand, int index, int x, int y, int z, EnumFacing rotation)
+	public ComponentTFDarkTowerMain(TFFeature feature, World world, Random rand, int index, int x, int y, int z, EnumFacing rotation)
 	{
-		super(index, x, y, z, 19, 56 + ((rand.nextInt(32) / 5) * 5), rotation);
+		super(feature, index, x, y, z, 19, 56 + ((rand.nextInt(32) / 5) * 5), rotation);
 
 		// check to make sure we can build the whole tower
 		if (this.boundingBox.maxY > 245)
 		{
 			int amtToLower = (((this.boundingBox.maxY - 245) / 5) * 5) + 5;
 
-			FMLLog.info("[TwilightForest] Lowering Dark Tower max height by %d to be within world bounds", amtToLower);
+			TwilightForestMod.LOGGER.info("[TwilightForest] Lowering Dark Tower max height by %d to be within world bounds", amtToLower);
 
 			this.height -= amtToLower;
 			this.boundingBox.maxY -= amtToLower;
@@ -84,9 +85,9 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 	@Override
 	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand)
 	{
-		if (parent != null && parent instanceof StructureTFComponent)
+		if (parent != null && parent instanceof StructureTFComponentOld)
 		{
-			this.deco = ((StructureTFComponent)parent).deco;
+			this.deco = ((StructureTFComponentOld)parent).deco;
 		}
 
 		// if this is not the first main part, add one
@@ -183,7 +184,6 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 			// count how many size 9 towers we have hanging off us
 			ArrayList<ComponentTFDarkTowerWing> possibleKeyTowers = new ArrayList<ComponentTFDarkTowerWing>();
 
-			int smallTowers = 0;
 
 			for (Object piece : list)
 			{
@@ -192,11 +192,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 					ComponentTFDarkTowerWing wing = (ComponentTFDarkTowerWing)piece;
 
 					if (wing.size == 9 && wing.getComponentType() == this.getComponentType())
-					{
-						smallTowers++;
-
 						possibleKeyTowers.add(wing);
-					}
 				}
 			}
 
@@ -204,7 +200,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 			{
 				if (possibleKeyTowers.size() < 1)
 				{
-					FMLLog.warning("[TwilightForest] Dark forest tower could not find four small towers to place keys in.");
+					TwilightForestMod.LOGGER.warn("[TwilightForest] Dark forest tower could not find four small towers to place keys in.");
 					break;
 				}
 
@@ -227,7 +223,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, 5, direction);
 
-		ComponentTFDarkTowerBridge bridge = new ComponentTFDarkTowerEntranceBridge(index, dx[0], dx[1], dx[2], childSize, childHeight, direction);
+		ComponentTFDarkTowerBridge bridge = new ComponentTFDarkTowerEntranceBridge(getFeatureType(), index, dx[0], dx[1], dx[2], childSize, childHeight, direction);
 		// if I'm doing this right, the main towers can't intersect
 		list.add(bridge);
 		bridge.buildComponent(this, list, rand);
@@ -247,7 +243,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, 5, direction);
 
-		ComponentTFDarkTowerMainBridge bridge = new ComponentTFDarkTowerMainBridge(index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
+		ComponentTFDarkTowerMainBridge bridge = new ComponentTFDarkTowerMainBridge(getFeatureType(), index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
 		// if I'm doing this right, the main towers can't intersect
 		list.add(bridge);
 		bridge.buildComponent(this, list, rand);
@@ -268,7 +264,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, 5, direction);
 
-		ComponentTFDarkTowerBossBridge bridge = new ComponentTFDarkTowerBossBridge(index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
+		ComponentTFDarkTowerBossBridge bridge = new ComponentTFDarkTowerBossBridge(getFeatureType(), index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
 		// if I'm doing this right, the main towers can't intersect
 		list.add(bridge);
 		bridge.buildComponent(this, list, rand);

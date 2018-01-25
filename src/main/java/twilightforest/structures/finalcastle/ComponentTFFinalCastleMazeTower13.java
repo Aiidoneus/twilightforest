@@ -8,11 +8,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFCastleDoor;
 import twilightforest.block.BlockTFCastleMagic;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 import twilightforest.util.RotationUtil;
 
@@ -29,8 +30,8 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 	public ComponentTFFinalCastleMazeTower13() {
 	}
 
-	public ComponentTFFinalCastleMazeTower13(Random rand, int i, int x, int y, int z, EnumDyeColor color, EnumFacing direction) {
-		super(i);
+	public ComponentTFFinalCastleMazeTower13(TFFeature feature, Random rand, int i, int x, int y, int z, EnumDyeColor color, EnumFacing direction) {
+		super(feature, i);
 		this.setCoordBaseMode(direction);
 		this.color = color;
 		this.size = 13;
@@ -53,36 +54,36 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 			entranceFloor = floors - 1;
 		}
 
-		this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -6, 0 - (entranceFloor * 8), -6, this.size - 1, this.height, this.size - 1, EnumFacing.SOUTH);
+		this.boundingBox = StructureTFComponentOld.getComponentToAddBoundingBox(x, y, z, -6, 0 - (entranceFloor * 8), -6, this.size - 1, this.height, this.size - 1, EnumFacing.SOUTH);
 
 		// we should have a door where we started
 		addOpening(0, entranceFloor * 8 + 1, size / 2, Rotation.CLOCKWISE_180);
 
 	}
 
-	public ComponentTFFinalCastleMazeTower13(Random rand, int i, int x, int y, int z, int floors, int entranceFloor, EnumDyeColor color, EnumFacing direction) {
-		super(i);
+	public ComponentTFFinalCastleMazeTower13(TFFeature feature, Random rand, int i, int x, int y, int z, int floors, int entranceFloor, EnumDyeColor color, EnumFacing direction) {
+		super(feature, i);
 		this.setCoordBaseMode(direction);
 		this.color = color;
 		this.size = 13;
 		this.height = floors * 8 + 1;
-		this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -6, 0 - (entranceFloor * 8), -6, this.size - 1, this.height, this.size - 1, EnumFacing.SOUTH);
+		this.boundingBox = StructureTFComponentOld.getComponentToAddBoundingBox(x, y, z, -6, 0 - (entranceFloor * 8), -6, this.size - 1, this.height, this.size - 1, EnumFacing.SOUTH);
 		addOpening(0, entranceFloor * 8 + 1, size / 2, Rotation.CLOCKWISE_180);
 	}
 
 	@Override
 	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 
 		// add foundation
-		ComponentTFFinalCastleFoundation13 foundation = new ComponentTFFinalCastleFoundation13(rand, 4, this);
+		ComponentTFFinalCastleFoundation13 foundation = new ComponentTFFinalCastleFoundation13(getFeatureType(), rand, 4, this);
 		list.add(foundation);
 		foundation.buildComponent(this, list, rand);
 
 		// add roof
-		StructureTFComponent roof = rand.nextBoolean() ? new ComponentTFFinalCastleRoof13Conical(rand, 4, this) : new ComponentTFFinalCastleRoof13Crenellated(rand, 4, this);
+		StructureTFComponentOld roof = rand.nextBoolean() ? new ComponentTFFinalCastleRoof13Conical(getFeatureType(), rand, 4, this) : new ComponentTFFinalCastleRoof13Crenellated(getFeatureType(), rand, 4, this);
 		list.add(roof);
 		roof.buildComponent(this, list, rand);
 	}
@@ -90,7 +91,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 	/**
 	 * Build more components towards the destination
 	 */
-	public void buildTowards(StructureComponent parent, List list, Random rand, BlockPos dest) {
+	public void buildTowards(StructureComponent parent, List<StructureComponent> list, Random rand, BlockPos dest) {
 		// regular building first, adds roof/foundation
 		this.buildComponent(parent, list, rand);
 
@@ -135,7 +136,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 
 	}
 
-	protected void buildNonCriticalTowers(StructureComponent parent, List list, Random rand) {
+	protected void buildNonCriticalTowers(StructureComponent parent, List<StructureComponent> list, Random rand) {
 		// pick a random direction
 		EnumFacing dir = RotationUtil.getRandomFacing(rand);
 		Rotation relativeRotation = RotationUtil.getRelativeRotation(this.getCoordBaseMode(), dir);
@@ -217,7 +218,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 		return this.getCoordBaseMode();
 	}
 
-	private boolean buildContinueTowerTowards(List list, Random rand, BlockPos dest, EnumFacing facing, int howFar) {
+	private boolean buildContinueTowerTowards(List<StructureComponent> list, Random rand, BlockPos dest, EnumFacing facing, int howFar) {
 		BlockPos opening = this.getValidOpeningCC(rand, facing);
 
 		// adjust opening towards dest.getY() if we are getting close to dest
@@ -246,7 +247,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 
 		if (isWithinRange(centerX, centerZ, tc.getX(), tc.getZ(), 128)) {
 
-			ComponentTFFinalCastleMazeTower13 sTower = new ComponentTFFinalCastleMazeTower13(rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), this.color, facing);
+			ComponentTFFinalCastleMazeTower13 sTower = new ComponentTFFinalCastleMazeTower13(getFeatureType(), rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), this.color, facing);
 
 			StructureBoundingBox largerBB = new StructureBoundingBox(sTower.getBoundingBox());
 
@@ -266,7 +267,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 
 				// add bridge
 				BlockPos bc = this.offsetTowerCCoords(opening.getX(), opening.getY(), opening.getZ(), 1, facing);
-				ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
+				ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(getFeatureType(), this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
 				list.add(bridge);
 				bridge.buildComponent(this, list, rand);
 
@@ -285,7 +286,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 	}
 
 
-	protected boolean buildDamagedTower(List list, Random rand, EnumFacing facing) {
+	protected boolean buildDamagedTower(List<StructureComponent> list, Random rand, EnumFacing facing) {
 		BlockPos opening = this.getValidOpeningCC(rand, facing);
 
 		int howFar = 14 + rand.nextInt(24);
@@ -310,7 +311,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 			eTower.buildComponent(this, list, rand);
 			// add bridge
 			BlockPos bc = this.offsetTowerCCoords(opening.getX(), opening.getY(), opening.getZ(), 1, facing);
-			ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
+			ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(getFeatureType(), this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
 			list.add(bridge);
 			bridge.buildComponent(this, list, rand);
 
@@ -325,7 +326,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 	}
 
 	protected ComponentTFFinalCastleMazeTower13 makeNewDamagedTower(Random rand, EnumFacing facing, BlockPos tc) {
-		return new ComponentTFFinalCastleDamagedTower(rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
+		return new ComponentTFFinalCastleDamagedTower(getFeatureType(), rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
 	}
 
 	private int adjustOpening(int posY, BlockPos dest) {
@@ -343,7 +344,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 		return openY;
 	}
 
-	private boolean buildEndTowerTowards(List list, Random rand, BlockPos dest, EnumFacing facing, int howFar) {
+	private boolean buildEndTowerTowards(List<StructureComponent> list, Random rand, BlockPos dest, EnumFacing facing, int howFar) {
 		BlockPos opening = this.getValidOpeningCC(rand, facing);
 		opening = new BlockPos(
 				opening.getX(),
@@ -360,9 +361,9 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 		// what color of tower?
 		ComponentTFFinalCastleMazeTower13 eTower;
 		if (this.color == BlockTFCastleMagic.VALID_COLORS.get(0)) {
-			eTower = new ComponentTFFinalCastleEntranceTower(rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
+			eTower = new ComponentTFFinalCastleEntranceTower(getFeatureType(), rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
 		} else {
-			eTower = new ComponentTFFinalCastleBellTower21(rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
+			eTower = new ComponentTFFinalCastleBellTower21(getFeatureType(), rand, this.getComponentType() + 1, tc.getX(), tc.getY(), tc.getZ(), facing);
 		}
 
 		StructureBoundingBox largerBB = new StructureBoundingBox(eTower.getBoundingBox());
@@ -380,7 +381,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 			eTower.buildComponent(this, list, rand);
 			// add bridge
 			BlockPos bc = this.offsetTowerCCoords(opening.getX(), opening.getY(), opening.getZ(), 1, facing);
-			ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
+			ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(getFeatureType(), this.getComponentType() + 1, bc.getX(), bc.getY(), bc.getZ(), howFar - 7, facing);
 			list.add(bridge);
 			bridge.buildComponent(this, list, rand);
 
@@ -456,6 +457,8 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 				break;
 			case EAST:
 				dz -= howFar;
+				break;
+			default:
 				break;
 		}
 

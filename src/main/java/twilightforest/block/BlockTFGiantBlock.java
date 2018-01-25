@@ -16,7 +16,6 @@ import twilightforest.client.ModelRegisterCallback;
 
 public abstract class BlockTFGiantBlock extends Block implements ModelRegisterCallback {
 
-	private IBlockState baseState;
 	private boolean isSelfDestructing;
 
 	//Atomic: Suppressing deprecation because this seems like a reasonable use for it.
@@ -24,7 +23,6 @@ public abstract class BlockTFGiantBlock extends Block implements ModelRegisterCa
 	public BlockTFGiantBlock(IBlockState state) {
 		super(state.getMaterial());
 		this.setSoundType(state.getBlock().getSoundType());
-		this.baseState = state;
 	}
 
 	@Override
@@ -35,7 +33,7 @@ public abstract class BlockTFGiantBlock extends Block implements ModelRegisterCa
 			for (int dy = 0; dy < 4; dy++) {
 				for (int dz = 0; dz < 4; dz++) {
 					IBlockState state = world.getBlockState(pos.add(dx, dy, dz));
-					if (!state.getBlock().isReplaceable(world, pos))
+					if (!state.getBlock().isReplaceable(world, pos.add(dx, dy, dz)))
 						return false;
 				}
 			}

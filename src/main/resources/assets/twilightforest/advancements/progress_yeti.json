@@ -4,10 +4,10 @@
       "item": "twilightforest:alpha_fur"
     },
     "title": {
-      "translate": "advancement.twilightProgressYeti"
+      "translate": "advancement.twilight_progress_yeti"
     },
     "description": {
-      "translate": "advancement.twilightProgressYeti.desc"
+      "translate": "advancement.twilight_progress_yeti.desc"
     },
     "frame": "goal"
   },
@@ -20,6 +20,26 @@
           "type": "twilightforest:yeti_alpha"
         }
       }
+    },
+    "fur": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "twilightforest:alpha_fur"
+          }
+        ]
+      }
+    },
+    "previous_progression": {
+      "trigger": "twilightforest:has_advancement",
+      "conditions": {
+        "advancement": "twilightforest:progress_ur_ghast"
+      }
     }
-  }
+  },
+  "requirements": [
+    [ "yeti", "fur" ],
+    [ "previous_progression" ]
+  ]
 }

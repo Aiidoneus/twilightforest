@@ -10,8 +10,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import twilightforest.TFFeature;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
 import twilightforest.world.TFGenerator;
 
 import java.util.List;
@@ -33,8 +33,8 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFTreeComponent {
 		super();
 	}
 
-	protected ComponentTFHollowTreeMedBranch(int i, int sx, int sy, int sz, double length, double angle, double tilt, boolean leafy) {
-		super(i);
+	protected ComponentTFHollowTreeMedBranch(TFFeature feature, int i, int sx, int sy, int sz, double length, double angle, double tilt, boolean leafy) {
+		super(feature, i);
 
 		this.src = new BlockPos(sx, sy, sz);
 		this.dest = TFGenerator.translate(src, length, angle, tilt);
@@ -65,19 +65,19 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFTreeComponent {
 	 * Save to NBT
 	 */
 	@Override
-	protected void writeStructureToNBT(NBTTagCompound par1NBTTagCompound) {
-		super.writeStructureToNBT(par1NBTTagCompound);
+	protected void writeStructureToNBT(NBTTagCompound tagCompound) {
+		super.writeStructureToNBT(tagCompound);
 
-		par1NBTTagCompound.setInteger("srcPosX", this.src.getX());
-		par1NBTTagCompound.setInteger("srcPosY", this.src.getY());
-		par1NBTTagCompound.setInteger("srcPosZ", this.src.getZ());
-		par1NBTTagCompound.setInteger("destPosX", this.dest.getX());
-		par1NBTTagCompound.setInteger("destPosY", this.dest.getY());
-		par1NBTTagCompound.setInteger("destPosZ", this.dest.getZ());
-		par1NBTTagCompound.setDouble("branchLength", this.length);
-		par1NBTTagCompound.setDouble("branchAngle", this.angle);
-		par1NBTTagCompound.setDouble("branchTilt", this.tilt);
-		par1NBTTagCompound.setBoolean("branchLeafy", this.leafy);
+		tagCompound.setInteger("srcPosX", this.src.getX());
+		tagCompound.setInteger("srcPosY", this.src.getY());
+		tagCompound.setInteger("srcPosZ", this.src.getZ());
+		tagCompound.setInteger("destPosX", this.dest.getX());
+		tagCompound.setInteger("destPosY", this.dest.getY());
+		tagCompound.setInteger("destPosZ", this.dest.getZ());
+		tagCompound.setDouble("branchLength", this.length);
+		tagCompound.setDouble("branchAngle", this.angle);
+		tagCompound.setDouble("branchTilt", this.tilt);
+		tagCompound.setBoolean("branchLeafy", this.leafy);
 
 	}
 
@@ -85,21 +85,21 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFTreeComponent {
 	 * Load from NBT
 	 */
 	@Override
-	protected void readStructureFromNBT(NBTTagCompound par1NBTTagCompound, TemplateManager templateManager) {
-		super.readStructureFromNBT(par1NBTTagCompound, templateManager);
+	protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager templateManager) {
+		super.readStructureFromNBT(tagCompound, templateManager);
 
 
-		this.src = new BlockPos(par1NBTTagCompound.getInteger("srcPosX"), par1NBTTagCompound.getInteger("srcPosY"), par1NBTTagCompound.getInteger("srcPosZ"));
-		this.dest = new BlockPos(par1NBTTagCompound.getInteger("destPosX"), par1NBTTagCompound.getInteger("destPosY"), par1NBTTagCompound.getInteger("destPosZ"));
+		this.src = new BlockPos(tagCompound.getInteger("srcPosX"), tagCompound.getInteger("srcPosY"), tagCompound.getInteger("srcPosZ"));
+		this.dest = new BlockPos(tagCompound.getInteger("destPosX"), tagCompound.getInteger("destPosY"), tagCompound.getInteger("destPosZ"));
 
-		this.length = par1NBTTagCompound.getDouble("branchLength");
-		this.angle = par1NBTTagCompound.getDouble("branchAngle");
-		this.tilt = par1NBTTagCompound.getDouble("branchTilt");
-		this.leafy = par1NBTTagCompound.getBoolean("branchLeafy");
+		this.length = tagCompound.getDouble("branchLength");
+		this.angle = tagCompound.getDouble("branchAngle");
+		this.tilt = tagCompound.getDouble("branchTilt");
+		this.leafy = tagCompound.getBoolean("branchLeafy");
 	}
 
-	public void makeSmallBranch(List list, Random rand, int index, int x, int y, int z, double branchLength, double branchRotation, double branchAngle, boolean leafy) {
-		ComponentTFHollowTreeSmallBranch branch = new ComponentTFHollowTreeSmallBranch(index, x, y, z, branchLength, branchRotation, branchAngle, leafy);
+	public void makeSmallBranch(List<StructureComponent> list, Random rand, int index, int x, int y, int z, double branchLength, double branchRotation, double branchAngle, boolean leafy) {
+		ComponentTFHollowTreeSmallBranch branch = new ComponentTFHollowTreeSmallBranch(getFeatureType(), index, x, y, z, branchLength, branchRotation, branchAngle, leafy);
 		list.add(branch);
 		branch.buildComponent(this, list, rand);
 	}
@@ -126,7 +126,7 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFTreeComponent {
 
 		// and several small branches
 		int numShoots = Math.min(decoRNG.nextInt(3) + 1, (int) (length / 5));
-		double angleInc, angleVar, outVar, tiltVar;
+		double angleInc, angleVar, outVar;
 
 		angleInc = 0.8 / numShoots;
 
@@ -134,7 +134,6 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFTreeComponent {
 
 			angleVar = (angleInc * i) - 0.4;
 			outVar = (decoRNG.nextDouble() * 0.8) + 0.2;
-			tiltVar = (decoRNG.nextDouble() * 0.75) + 0.15;
 
 			BlockPos bSrc = TFGenerator.translate(rSrc, length * outVar, angle, tilt);
 

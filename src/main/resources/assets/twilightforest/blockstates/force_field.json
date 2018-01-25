@@ -2,37 +2,33 @@
   "forge_marker": 1,
   "defaults": {
     "transform": "forge:default-item",
-    "model": "twilightforest:util/pane_post",
+    "model": "twilightforest:util/pane/post",
+    "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_white" },
     "uvlock":true
   },
   "variants": {
-    "inventory_purple": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_purple"}}],
-    "inventory_pink": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_pink"}}],
-    "inventory_orange": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_orange"}}],
-    "inventory_green": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_green"}}],
-    "inventory_blue": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_blue"}}],
-    "color": {
-      "purple": { "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_purple" } },
-      "pink":   { "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_pink" } },
-      "orange": { "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_orange" } },
-      "green":  { "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_green" } },
-      "blue":   { "textures": { "edge": "#pane", "pane": "twilightforest:blocks/forcefield_blue" } }
+    "inventory": [{ "model": "builtin/generated", "textures": { "layer0": "twilightforest:blocks/forcefield_white"}}],
+    "axis": {
+      "x":{ "x": 90, "y": 90 },
+      "y":{},
+      "z":{ "x": 270, "y": 180 }
     },
+    "color": { "purple": { }, "pink": { }, "orange": { }, "green": { }, "blue": { } },
     "north": {
-      "true" : { "submodel": { "key_n": { "model": "twilightforest:util/pane_side" } } },
-      "false": { "submodel": { "key_n": { "model": "twilightforest:util/pane_noside" } } }
+      "true" : { "submodel": { "key_n": { "model": "twilightforest:util/pane/side" } } },
+      "false": { "submodel": { "key_n": { "model": "twilightforest:util/pane/noside" } } }
     },
     "east" : {
-      "true" : { "submodel": { "key_e": { "model": "twilightforest:util/pane_side", "y": 90 } } },
-      "false": { "submodel": { "key_e": { "model": "twilightforest:util/pane_noside_alt" } } }
+      "true" : { "submodel": { "key_e": { "model": "twilightforest:util/pane/side", "y": 90 } } },
+      "false": { "submodel": { "key_e": { "model": "twilightforest:util/pane/noside_alt" } } }
     },
     "south": {
-      "true" : { "submodel": { "key_s": { "model": "twilightforest:util/pane_side_alt" } } },
-      "false": { "submodel": { "key_s": { "model": "twilightforest:util/pane_noside_alt", "y": 90 } } }
+      "true" : { "submodel": { "key_s": { "model": "twilightforest:util/pane/side_alt" } } },
+      "false": { "submodel": { "key_s": { "model": "twilightforest:util/pane/noside_alt", "y": 90 } } }
     },
     "west" : {
-      "true" : { "submodel": { "key_w": { "model": "twilightforest:util/pane_side_alt", "y": 90 } } },
-      "false": { "submodel": { "key_w": { "model": "twilightforest:util/pane_noside", "y": 270 } } }
+      "true" : { "submodel": { "key_w": { "model": "twilightforest:util/pane/side_alt", "y": 90 } } },
+      "false": { "submodel": { "key_w": { "model": "twilightforest:util/pane/noside", "y": 270 } } }
     }
   }
 }

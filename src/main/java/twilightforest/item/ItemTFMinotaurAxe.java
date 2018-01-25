@@ -4,7 +4,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
@@ -20,7 +19,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import twilightforest.client.ModelRegisterCallback;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -28,8 +26,7 @@ public class ItemTFMinotaurAxe extends ItemAxe implements ModelRegisterCallback 
 	private static final int BONUS_CHARGING_DAMAGE = 7;
 
 	protected ItemTFMinotaurAxe(Item.ToolMaterial material) {
-		super(material, material.getDamageVsEntity(), -3.0f);
-		this.damageVsEntity = 4 + material.getDamageVsEntity();
+		super(material, 4F + material.getDamageVsEntity(), -3.0f);
 		this.setCreativeTab(TFItems.creativeTab);
 	}
 

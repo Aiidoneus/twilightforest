@@ -1,6 +1,5 @@
 package twilightforest.block;
 
-import com.google.common.collect.ImmutableList;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockPlanks;
@@ -9,22 +8,24 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import twilightforest.block.enums.LeavesVariant;
+import twilightforest.TFConfig;
 import twilightforest.client.ModelRegisterCallback;
 import twilightforest.client.ModelUtils;
+import twilightforest.enums.LeavesVariant;
 import twilightforest.item.TFItems;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Random;
@@ -37,9 +38,19 @@ public class BlockTFLeaves extends BlockLeaves implements ModelRegisterCallback 
 
 	protected BlockTFLeaves() {
 		this.setHardness(0.2F);
-		this.setLightOpacity(2);
+		this.setLightOpacity(1);
 		this.setCreativeTab(TFItems.creativeTab);
 		this.setDefaultState(blockState.getBaseState().withProperty(CHECK_DECAY, true).withProperty(DECAYABLE, true).withProperty(VARIANT, LeavesVariant.OAK));
+	}
+
+	@Override
+	public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return TFConfig.performance.leavesLightOpacity;
+	}
+
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return TFConfig.performance.leavesFullCube;
 	}
 
 	@Override
@@ -80,12 +91,6 @@ public class BlockTFLeaves extends BlockLeaves implements ModelRegisterCallback 
 		par3List.add(new ItemStack(this, 1, 1));
 		par3List.add(new ItemStack(this, 1, 2));
 		par3List.add(new ItemStack(this, 1, 3));
-
-	}
-
-	@Override
-	public int quantityDropped(Random par1Random) {
-		return par1Random.nextInt(40) == 0 ? 1 : 0;
 	}
 
 	@Override
@@ -100,19 +105,13 @@ public class BlockTFLeaves extends BlockLeaves implements ModelRegisterCallback 
 	}
 
 	@Override
-	public void dropBlockAsItemWithChance(World par1World, BlockPos pos, IBlockState state, float par6, int par7) {
-		if (!par1World.isRemote) {
-			byte chance = 40;
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		return new ItemStack(this, 1, world.getBlockState(pos).getValue(VARIANT).ordinal());
+	}
 
-			if (state.getValue(BlockTFLeaves.VARIANT) == LeavesVariant.MANGROVE) {
-				chance = 20;
-			}
-
-			if (par1World.rand.nextInt(chance) == 0) {
-				Item item = this.getItemDropped(state, par1World.rand, par7);
-				spawnAsEntity(par1World, pos, new ItemStack(item, 1, damageDropped(state)));
-			}
-		}
+	@Override
+	public int getSaplingDropChance(IBlockState state) {
+		return state.getValue(VARIANT) == LeavesVariant.MANGROVE ? 20 : 40;
 	}
 
 	@Override
@@ -123,7 +122,7 @@ public class BlockTFLeaves extends BlockLeaves implements ModelRegisterCallback 
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void registerModel() {
-		ModelLoader.setCustomStateMapper(this, new StateMap.Builder().ignore(CHECK_DECAY).ignore(DECAYABLE).build());
+		ModelLoader.setCustomStateMapper(this, new StateMap.Builder().ignore(CHECK_DECAY, DECAYABLE).build());
 		ModelUtils.registerToStateSingleVariant(this, VARIANT);
 	}
 

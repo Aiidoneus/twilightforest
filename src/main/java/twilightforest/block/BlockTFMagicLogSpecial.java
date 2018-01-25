@@ -9,14 +9,12 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
@@ -25,7 +23,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import twilightforest.TFPacketHandler;
 import twilightforest.biomes.TFBiomes;
-import twilightforest.block.enums.MagicWoodVariant;
+import twilightforest.enums.MagicWoodVariant;
 import twilightforest.item.ItemTFOreMagnet;
 import twilightforest.item.TFItems;
 import twilightforest.network.PacketChangeBiome;
@@ -51,6 +49,11 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 	@Override
 	public Item getItemDropped(IBlockState state, Random par2Random, int par3) {
 		return Item.getItemFromBlock(TFBlocks.magicLog);
+	}
+
+	@Override
+	public int damageDropped(IBlockState state) {
+		return state.getValue(VARIANT).ordinal();
 	}
 
 	@Override
@@ -340,5 +343,15 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 		par3List.add(new ItemStack(this, 1, 1));
 		par3List.add(new ItemStack(this, 1, 2));
 		par3List.add(new ItemStack(this, 1, 3));
+	}
+
+	@Override
+	protected boolean canSilkHarvest() {
+		return false;
+	}
+
+	@Override
+	public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
+		return false;
 	}
 }

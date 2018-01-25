@@ -26,7 +26,7 @@ import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFPlant;
 import twilightforest.block.TFBlocks;
-import twilightforest.block.enums.PlantVariant;
+import twilightforest.enums.PlantVariant;
 import twilightforest.entity.EntityTFMosquitoSwarm;
 import twilightforest.world.TFGenHugeLilyPad;
 import twilightforest.world.TFGenTallGrass;
@@ -143,13 +143,12 @@ public class TFBiomeSwamp extends TFBiomeBase {
 
 	@Override
 	public void enforceProgession(EntityPlayer player, World world) {
-		if (!world.isRemote && world.getWorldTime() % 60 == 0) {
+		if (!world.isRemote && player.ticksExisted % 60 == 0) {
 			PotionEffect currentHunger = player.getActivePotionEffect(MobEffects.HUNGER);
 
 			int hungerLevel = currentHunger != null ? currentHunger.getAmplifier() + 1 : 1;
 
 			player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 100, hungerLevel));
-			//((EntityLivingBase)par1Entity).addPotionEffect(new PotionEffect(MobEffects.HUNGER.id, duration * 20, 0));
 
 			// hint monster?
 			if (world.rand.nextInt(4) == 0) {

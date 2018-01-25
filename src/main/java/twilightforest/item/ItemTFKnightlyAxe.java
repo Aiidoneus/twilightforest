@@ -2,7 +2,6 @@ package twilightforest.item;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
@@ -17,8 +16,8 @@ import java.util.List;
 
 public class ItemTFKnightlyAxe extends ItemAxe implements ModelRegisterCallback {
 
-	protected ItemTFKnightlyAxe(Item.ToolMaterial par2EnumToolMaterial) {
-		super(par2EnumToolMaterial, par2EnumToolMaterial.getDamageVsEntity(), -3.0f);
+	protected ItemTFKnightlyAxe(Item.ToolMaterial material) {
+		super(material, 4F + material.getDamageVsEntity(), -3.0f);
 		this.setCreativeTab(TFItems.creativeTab);
 	}
 

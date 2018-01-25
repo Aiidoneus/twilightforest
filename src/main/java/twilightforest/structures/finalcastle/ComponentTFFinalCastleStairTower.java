@@ -7,10 +7,11 @@ import net.minecraft.util.Rotation;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.block.BlockTFCastleDoor;
 import twilightforest.block.BlockTFCastleMagic;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 
 import java.util.List;
@@ -21,21 +22,22 @@ public class ComponentTFFinalCastleStairTower extends ComponentTFTowerWing {
 	public ComponentTFFinalCastleStairTower() {
 	}
 
-	public ComponentTFFinalCastleStairTower(Random rand, int i, int x, int y, int z, EnumFacing rotation) {
+	public ComponentTFFinalCastleStairTower(TFFeature feature, Random rand, int i, int x, int y, int z, EnumFacing rotation) {
+		super(feature, i);
 		this.setCoordBaseMode(rotation);
 		this.size = 9;
 		this.height = 51;
-		this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -4, 0, -4, 8, 50, 8, EnumFacing.SOUTH);
+		this.boundingBox = StructureTFComponentOld.getComponentToAddBoundingBox(x, y, z, -4, 0, -4, 8, 50, 8, EnumFacing.SOUTH);
 
 	}
 
 	@Override
 	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 		// add crown
-		ComponentTFFinalCastleRoof9Crenellated roof = new ComponentTFFinalCastleRoof9Crenellated(rand, 4, this);
+		ComponentTFFinalCastleRoof9Crenellated roof = new ComponentTFFinalCastleRoof9Crenellated(getFeatureType(), rand, 4, this);
 		list.add(roof);
 		roof.buildComponent(this, list, rand);
 	}

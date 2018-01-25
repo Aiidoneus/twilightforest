@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.block.TFBlocks;
 import twilightforest.world.TFGenerator;
 
@@ -24,15 +25,15 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
 		super();
 	}
 
-	protected ComponentTFHollowTreeLargeBranch(int i, int sx, int sy, int sz, double length, double angle, double tilt, boolean leafy) {
-		super(i, sx, sy, sz, length, angle, tilt, leafy);
+	protected ComponentTFHollowTreeLargeBranch(TFFeature feature, int i, int sx, int sy, int sz, double length, double angle, double tilt, boolean leafy) {
+		super(feature, i, sx, sy, sz, length, angle, tilt, leafy);
 	}
 
 	/**
 	 * Add other structure components to this one if needed
 	 */
 	@Override
-	public void buildComponent(StructureComponent structurecomponent, List list, Random rand) {
+	public void buildComponent(StructureComponent structurecomponent, List<StructureComponent> list, Random rand) {
 		int index = getComponentType();
 
 		this.hasLeafDungeon = (rand.nextInt(LEAF_DUNGEON_CHANCE) == 0);
@@ -58,14 +59,14 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
 		}
 	}
 
-	public void makeLeafDungeon(List list, Random rand, int index, BlockPos pos) {
-		ComponentTFHollowTreeLeafDungeon dungeon = new ComponentTFHollowTreeLeafDungeon(index, pos.getX(), pos.getY(), pos.getZ(), 4);
+	public void makeLeafDungeon(List<StructureComponent> list, Random rand, int index, BlockPos pos) {
+		ComponentTFHollowTreeLeafDungeon dungeon = new ComponentTFHollowTreeLeafDungeon(getFeatureType(), index, pos.getX(), pos.getY(), pos.getZ(), 4);
 		list.add(dungeon);
 		dungeon.buildComponent(this, list, rand);
 	}
 
-	public void makeMedBranch(List list, Random rand, int index, int x, int y, int z, double branchLength, double branchRotation, double branchAngle, boolean leafy) {
-		ComponentTFHollowTreeMedBranch branch = new ComponentTFHollowTreeMedBranch(index, x, y, z, branchLength, branchRotation, branchAngle, leafy);
+	public void makeMedBranch(List<StructureComponent> list, Random rand, int index, int x, int y, int z, double branchLength, double branchRotation, double branchAngle, boolean leafy) {
+		ComponentTFHollowTreeMedBranch branch = new ComponentTFHollowTreeMedBranch(getFeatureType(), index, x, y, z, branchLength, branchRotation, branchAngle, leafy);
 		if (!branchIntersectsDungeon(branch, list))
 		{
 			list.add(branch);

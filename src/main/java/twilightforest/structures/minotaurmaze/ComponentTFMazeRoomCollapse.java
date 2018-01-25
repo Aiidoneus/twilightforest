@@ -3,23 +3,23 @@ package twilightforest.structures.minotaurmaze;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import twilightforest.TFFeature;
 import twilightforest.block.BlockTFPlant;
 import twilightforest.block.TFBlocks;
 
 import java.util.Random;
 
-import static twilightforest.block.enums.PlantVariant.ROOT_STRAND;
+import static twilightforest.enums.PlantVariant.ROOT_STRAND;
 
 public class ComponentTFMazeRoomCollapse extends ComponentTFMazeRoom {
 
 	public ComponentTFMazeRoomCollapse() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 
-	public ComponentTFMazeRoomCollapse(int i, Random rand, int x, int y, int z) {
-		super(i, rand, x, y, z);
+	public ComponentTFMazeRoomCollapse(TFFeature feature, int i, Random rand, int x, int y, int z) {
+		super(feature, i, rand, x, y, z);
 	}
 
 

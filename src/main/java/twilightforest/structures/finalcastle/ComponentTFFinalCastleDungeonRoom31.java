@@ -8,11 +8,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomes;
 import twilightforest.block.BlockTFCastleMagic;
 import twilightforest.block.BlockTFForceField;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 import twilightforest.util.RotationUtil;
 
@@ -25,20 +26,20 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 	public ComponentTFFinalCastleDungeonRoom31() {
 	}
 
-	public ComponentTFFinalCastleDungeonRoom31(Random rand, int i, int x, int y, int z, EnumFacing direction, int level) {
-		super(i);
+	public ComponentTFFinalCastleDungeonRoom31(TFFeature feature, Random rand, int i, int x, int y, int z, EnumFacing direction, int level) {
+		super(feature, i);
 		this.setCoordBaseMode(direction);
 		this.spawnListIndex = 2; // dungeon monsters
 		this.size = 31;
 		this.height = 7;
 		this.level = level;
-		this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -15, 0, -15, this.size - 1, this.height - 1, this.size - 1, EnumFacing.SOUTH);
+		this.boundingBox = StructureTFComponentOld.getComponentToAddBoundingBox(x, y, z, -15, 0, -15, this.size - 1, this.height - 1, this.size - 1, EnumFacing.SOUTH);
 	}
 
 	@Override
 	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 
 		int mySpread = this.getComponentType() - parent.getComponentType();
@@ -80,12 +81,12 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 		}
 	}
 
-	protected boolean addDungeonRoom(StructureComponent parent, List list, Random rand, Rotation rotation, int level) {
+	protected boolean addDungeonRoom(StructureComponent parent, List<StructureComponent> list, Random rand, Rotation rotation, int level) {
 		rotation = rotation.add(this.rotation);
 
 		BlockPos rc = this.getNewRoomCoords(rand, rotation);
 
-		ComponentTFFinalCastleDungeonRoom31 dRoom = new ComponentTFFinalCastleDungeonRoom31(rand, this.componentType + 1, rc.getX(), rc.getY(), rc.getZ(), rotation.rotate(EnumFacing.SOUTH), level);
+		ComponentTFFinalCastleDungeonRoom31 dRoom = new ComponentTFFinalCastleDungeonRoom31(getFeatureType(), rand, this.componentType + 1, rc.getX(), rc.getY(), rc.getZ(), rotation.rotate(EnumFacing.SOUTH), level);
 
 		StructureBoundingBox largerBB = new StructureBoundingBox(dRoom.getBoundingBox());
 
@@ -95,7 +96,7 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 		largerBB.maxX += expand;
 		largerBB.maxZ += expand;
 
-		StructureComponent intersect = StructureTFComponent.findIntersectingExcluding(list, largerBB, this);
+		StructureComponent intersect = StructureTFComponentOld.findIntersectingExcluding(list, largerBB, this);
 		if (intersect == null) {
 			list.add(dRoom);
 			dRoom.buildComponent(parent, list, rand);
@@ -105,14 +106,14 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 		}
 	}
 
-	protected boolean addDungeonExit(StructureComponent parent, List list, Random rand, Rotation rotation) {
+	protected boolean addDungeonExit(StructureComponent parent, List<StructureComponent> list, Random rand, Rotation rotation) {
 
 		//TODO: check if we are sufficiently near the castle center
 
 		rotation = rotation.add(this.rotation);
 		BlockPos rc = this.getNewRoomCoords(rand, rotation);
-		ComponentTFFinalCastleDungeonExit dRoom = new ComponentTFFinalCastleDungeonExit(rand, this.componentType + 1, rc.getX(), rc.getY(), rc.getZ(), rotation.rotate(EnumFacing.SOUTH), this.level);
-		StructureComponent intersect = StructureTFComponent.findIntersectingExcluding(list, dRoom.getBoundingBox(), this);
+		ComponentTFFinalCastleDungeonExit dRoom = new ComponentTFFinalCastleDungeonExit(getFeatureType(), rand, this.componentType + 1, rc.getX(), rc.getY(), rc.getZ(), rotation.rotate(EnumFacing.SOUTH), this.level);
+		StructureComponent intersect = StructureTFComponentOld.findIntersectingExcluding(list, dRoom.getBoundingBox(), this);
 		if (intersect == null) {
 			list.add(dRoom);
 			dRoom.buildComponent(this, list, rand);

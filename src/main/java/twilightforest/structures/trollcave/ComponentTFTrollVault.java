@@ -4,21 +4,20 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.TFTreasure;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 
-import java.util.List;
 import java.util.Random;
 
-public class ComponentTFTrollVault extends StructureTFComponent {
+public class ComponentTFTrollVault extends StructureTFComponentOld {
 
 	public ComponentTFTrollVault() {
 	}
 
-	public ComponentTFTrollVault(int index, int x, int y, int z) {
-		super(index);
+	public ComponentTFTrollVault(TFFeature feature, int index, int x, int y, int z) {
+		super(feature, index);
 		this.setCoordBaseMode(EnumFacing.SOUTH);
 
 
@@ -30,7 +29,7 @@ public class ComponentTFTrollVault extends StructureTFComponent {
 		// spawn list!
 		this.spawnListIndex = -1;
 
-		this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -8, 0, -8, 12, 12, 12, EnumFacing.SOUTH);
+		this.boundingBox = StructureTFComponentOld.getComponentToAddBoundingBox(x, y, z, -8, 0, -8, 12, 12, 12, EnumFacing.SOUTH);
 	}
 
 	@Override

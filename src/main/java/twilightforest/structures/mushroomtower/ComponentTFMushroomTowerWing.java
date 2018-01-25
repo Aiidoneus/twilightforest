@@ -9,8 +9,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.lichtower.ComponentTFTowerRoof;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 import twilightforest.util.RotationUtil;
@@ -31,35 +32,35 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 		super();
 	}
 
-	protected ComponentTFMushroomTowerWing(int i, int x, int y, int z, int pSize, int pHeight, EnumFacing direction) {
-		super(i, x, y, z, pSize, pHeight, direction);
+	protected ComponentTFMushroomTowerWing(TFFeature feature, int i, int x, int y, int z, int pSize, int pHeight, EnumFacing direction) {
+		super(feature, i, x, y, z, pSize, pHeight, direction);
 	}
 
 	/**
 	 * Save to NBT
 	 */
 	@Override
-	protected void writeStructureToNBT(NBTTagCompound par1NBTTagCompound) {
-		super.writeStructureToNBT(par1NBTTagCompound);
+	protected void writeStructureToNBT(NBTTagCompound tagCompound) {
+		super.writeStructureToNBT(tagCompound);
 
-		par1NBTTagCompound.setBoolean("hasBase", this.hasBase);
-		par1NBTTagCompound.setBoolean("isAscender", this.isAscender);
+		tagCompound.setBoolean("hasBase", this.hasBase);
+		tagCompound.setBoolean("isAscender", this.isAscender);
 	}
 
 	/**
 	 * Load from NBT
 	 */
 	@Override
-	protected void readStructureFromNBT(NBTTagCompound par1NBTTagCompound, TemplateManager templateManager) {
-		super.readStructureFromNBT(par1NBTTagCompound, templateManager);
-		this.hasBase = par1NBTTagCompound.getBoolean("hasBase");
-		this.isAscender = par1NBTTagCompound.getBoolean("isAscender");
+	protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager templateManager) {
+		super.readStructureFromNBT(tagCompound, templateManager);
+		this.hasBase = tagCompound.getBoolean("hasBase");
+		this.isAscender = tagCompound.getBoolean("isAscender");
 	}
 
 	@Override
-	public void buildComponent(StructureComponent parent, List list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 
 		// we should have a door where we started
@@ -126,7 +127,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 	 * Make a new wing
 	 */
 	@Override
-	public boolean makeTowerWing(List list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
+	public boolean makeTowerWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
 
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, wingSize, direction);
@@ -141,7 +142,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 			dx = adjustCoordinates(dx[0], dx[1], dx[2], wingSize, direction, list);
 		}
 
-		ComponentTFMushroomTowerWing wing = new ComponentTFMushroomTowerWing(index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
+		ComponentTFMushroomTowerWing wing = new ComponentTFMushroomTowerWing(getFeatureType(), index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
 		// check to see if it intersects something already there
 		StructureComponent intersect = StructureComponent.findIntersecting(list, wing.getBoundingBox());
 		if (intersect == null || intersect == this || intersect instanceof ComponentTFTowerRoofMushroom) {
@@ -165,7 +166,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 	/**
 	 * Adjust the coordinates for this tower to link up with any others within 3
 	 */
-	protected int[] adjustCoordinates(int x, int y, int z, int wingSize, EnumFacing direction, List list) {
+	protected int[] adjustCoordinates(int x, int y, int z, int wingSize, EnumFacing direction, List<StructureComponent> list) {
 
 		// go through list.  if there are any same size towers within wingSize, return their xyz instead
 
@@ -183,6 +184,8 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 							return new int[]{otherWing.getBoundingBox().maxX, y, otherWing.getBoundingBox().maxZ};
 						case EAST:
 							return new int[]{otherWing.getBoundingBox().minX, y, otherWing.getBoundingBox().maxZ};
+						default:
+							return new int[]{x, y, z};
 					}
 				}
 			}
@@ -195,7 +198,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 	/**
 	 * Are there (not) any other towers below this bounding box?
 	 */
-	private boolean isHighest(StructureBoundingBox boundingBox, int size, List list) {
+	private boolean isHighest(StructureBoundingBox boundingBox, int size, List<StructureComponent> list) {
 		// go through list.  if there are any same size towers within wingSize, return their xyz instead
 
 		StructureBoundingBox boxAbove = new StructureBoundingBox(boundingBox);
@@ -219,19 +222,19 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 	 * Make a mushroom roof!
 	 */
 	@Override
-	public void makeARoof(StructureComponent parent, List list, Random rand) {
+	public void makeARoof(StructureComponent parent, List<StructureComponent> list, Random rand) {
 
-		ComponentTFTowerRoof roof = new ComponentTFTowerRoofMushroom(this.getComponentType() + 1, this, 1.6F);
+		ComponentTFTowerRoof roof = new ComponentTFTowerRoofMushroom(getFeatureType(), this.getComponentType() + 1, this, 1.6F);
 		if (StructureComponent.findIntersecting(list, roof.getBoundingBox()) instanceof ComponentTFTowerRoofMushroom) {
 			list.add(roof);
 			roof.buildComponent(this, list, rand);
 		} else {
-			roof = new ComponentTFTowerRoofMushroom(this.getComponentType() + 1, this, 1.0F);
+			roof = new ComponentTFTowerRoofMushroom(getFeatureType(), this.getComponentType() + 1, this, 1.0F);
 			if (StructureComponent.findIntersecting(list, roof.getBoundingBox()) instanceof ComponentTFTowerRoofMushroom) {
 				list.add(roof);
 				roof.buildComponent(this, list, rand);
 			} else {
-				roof = new ComponentTFTowerRoofMushroom(this.getComponentType() + 1, this, 0.6F);
+				roof = new ComponentTFTowerRoofMushroom(getFeatureType(), this.getComponentType() + 1, this, 0.6F);
 				list.add(roof);
 				roof.buildComponent(this, list, rand);
 			}
@@ -241,11 +244,11 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 
 
 	@Override
-	protected boolean makeBridge(List list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
+	protected boolean makeBridge(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
 		return this.makeBridge(list, rand, index, x, y, z, wingSize, wingHeight, rotation, false);
 	}
 
-	protected boolean makeBridge(List list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation, boolean ascender) {
+	protected boolean makeBridge(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation, boolean ascender) {
 		// bridges are size  always
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, 3, direction);
@@ -255,7 +258,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 			wingHeight = 4;
 		}
 
-		ComponentTFMushroomTowerBridge bridge = new ComponentTFMushroomTowerBridge(index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
+		ComponentTFMushroomTowerBridge bridge = new ComponentTFMushroomTowerBridge(getFeatureType(), index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
 		bridge.isAscender = ascender;
 		// check to see if it intersects something already there
 		StructureComponent intersect = StructureComponent.findIntersecting(list, bridge.getBoundingBox());
@@ -275,12 +278,12 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 		}
 	}
 
-	private boolean makeMainBridge(List list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
+	private boolean makeMainBridge(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int wingSize, int wingHeight, Rotation rotation) {
 
 		EnumFacing direction = getStructureRelativeRotation(rotation);
 		int[] dx = offsetTowerCoords(x, y, z, 3, direction);
 
-		ComponentTFMushroomTowerMainBridge bridge = new ComponentTFMushroomTowerMainBridge(index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
+		ComponentTFMushroomTowerMainBridge bridge = new ComponentTFMushroomTowerMainBridge(getFeatureType(), index, dx[0], dx[1], dx[2], wingSize, wingHeight, direction);
 
 		list.add(bridge);
 		bridge.buildComponent(this, list, rand);

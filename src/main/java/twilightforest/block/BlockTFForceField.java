@@ -2,14 +2,15 @@ package twilightforest.block;
 
 import com.google.common.collect.ImmutableList;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,6 +19,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -28,43 +30,61 @@ import twilightforest.item.TFItems;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Random;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BlockTFForceField extends BlockPane implements ModelRegisterCallback {
-
+public class BlockTFForceField extends BlockTFConnectableRotatedPillar implements ModelRegisterCallback {
 	public static final List<EnumDyeColor> VALID_COLORS = ImmutableList.of(EnumDyeColor.PURPLE, EnumDyeColor.PINK, EnumDyeColor.ORANGE, EnumDyeColor.GREEN, EnumDyeColor.BLUE);
 	public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.create("color", EnumDyeColor.class, VALID_COLORS);
 
-	protected BlockTFForceField() {
-		super(Material.GRASS, false);
+	BlockTFForceField() {
+		super(Material.BARRIER, 7, 9);
+		this.setBlockUnbreakable();
+		this.setResistance(Float.MAX_VALUE);
 		this.setLightLevel(2F / 15F);
 		this.setCreativeTab(TFItems.creativeTab);
-		this.setDefaultState(blockState.getBaseState()
-				.withProperty(NORTH, false).withProperty(SOUTH, false)
-				.withProperty(WEST, false).withProperty(EAST, false)
-				.withProperty(COLOR, EnumDyeColor.PURPLE));
-	}
-
-	@Override
-	public BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, NORTH, SOUTH, WEST, EAST, COLOR);
+		this.setDefaultState(this.getDefaultState().withProperty(COLOR, EnumDyeColor.PURPLE));
 	}
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return VALID_COLORS.indexOf(state.getValue(COLOR));
+		return VALID_COLORS.indexOf(state.getValue(COLOR)) + (((state.getValue(AXIS).ordinal() + 1) % 3) * 5);
 	}
 
 	@Override
-	@Deprecated
 	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(COLOR, VALID_COLORS.get(meta));
+		return getDefaultState().withProperty(COLOR, VALID_COLORS.get(meta % 5)).withProperty(AXIS, EnumFacing.Axis.values()[((meta / 5) + 1) % 3]);
 	}
 
 	@Override
-	public int damageDropped(IBlockState state) {
-		return getMetaFromState(state);
+	protected IProperty[] getAdditionalProperties() {
+		return new IProperty[]{ COLOR };
+	}
+
+	@Override
+	protected AxisAlignedBB getSidedAABBStraight(EnumFacing facing, EnumFacing.Axis axis) {
+		return makeQuickAABB(
+				facing == EnumFacing.EAST  || axis == EnumFacing.Axis.X ? 16 : this.boundingBoxLower,
+				facing == EnumFacing.UP    || axis == EnumFacing.Axis.Y ? 16 : this.boundingBoxLower,
+				facing == EnumFacing.SOUTH || axis == EnumFacing.Axis.Z ? 16 : this.boundingBoxLower,
+				facing == EnumFacing.WEST  || axis == EnumFacing.Axis.X ?  0 : this.boundingBoxUpper,
+				facing == EnumFacing.DOWN  || axis == EnumFacing.Axis.Y ?  0 : this.boundingBoxUpper,
+				facing == EnumFacing.NORTH || axis == EnumFacing.Axis.Z ?  0 : this.boundingBoxUpper);
+	}
+
+	@Override
+	protected boolean canConnectTo(IBlockState state, IBlockState otherState, IBlockAccess world, BlockPos pos, EnumFacing connectTo) {
+		BlockFaceShape blockFaceShape = otherState.getBlockFaceShape(world, pos, connectTo);
+
+		return blockFaceShape == BlockFaceShape.SOLID
+				|| blockFaceShape == BlockFaceShape.MIDDLE_POLE_THIN
+				|| super.canConnectTo(state, otherState, world, pos, connectTo);
+	}
+
+	@Override
+	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+		return Items.AIR;
 	}
 
 	@Override
@@ -74,20 +94,32 @@ public class BlockTFForceField extends BlockPane implements ModelRegisterCallbac
 		}
 	}
 
+	@Override
+	public boolean isOpaqueCube(IBlockState state)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isFullCube(IBlockState state)
+	{
+		return false;
+	}
+
+	@Override
+	public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face) {
+		return face.getAxis() != state.getValue(AXIS) ? BlockFaceShape.MIDDLE_POLE_THIN : BlockFaceShape.CENTER_SMALL;
+	}
+
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		return new ItemStack(TFBlocks.forceField, 1, VALID_COLORS.indexOf(state.getValue(COLOR)));
+	}
+
 	@SideOnly(Side.CLIENT)
 	@Override
 	public BlockRenderLayer getBlockLayer() {
 		return BlockRenderLayer.TRANSLUCENT;
-	}
-
-	@Override
-	public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB aabb, List<AxisAlignedBB> list, Entity entity, boolean useActualState) {
-		// fill in the whole bounding box when we connect on all sides
-		if (state.getValue(NORTH) && state.getValue(SOUTH) & state.getValue(WEST) && state.getValue(EAST)) {
-			addCollisionBoxToList(pos, aabb, list, FULL_BLOCK_AABB);
-		} else {
-			super.addCollisionBoxToList(state, world, pos, aabb, list, entity, useActualState);
-		}
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -98,10 +130,11 @@ public class BlockTFForceField extends BlockPane implements ModelRegisterCallbac
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void registerModel() {
+		ModelResourceLocation mrl = new ModelResourceLocation(getRegistryName(), "inventory");
 		for (int i = 0; i < VALID_COLORS.size(); i++) {
-			String variant = "inventory_" + VALID_COLORS.get(i).getName();
-			ModelResourceLocation mrl = new ModelResourceLocation(getRegistryName(), variant);
 			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), i, mrl);
 		}
+
+		//ModelLoader.setCustomStateMapper(this, new StateMap.Builder().ignore(blockState.getProperties().toArray(new IProperty[blockState.getProperties().size()])).build());
 	}
 }

@@ -21,8 +21,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import twilightforest.block.enums.TowerDeviceVariant;
-import twilightforest.block.enums.TowerTranslucentVariant;
+import twilightforest.enums.TowerDeviceVariant;
+import twilightforest.enums.TowerTranslucentVariant;
 import twilightforest.client.ModelRegisterCallback;
 import twilightforest.client.ModelUtils;
 import twilightforest.item.TFItems;
@@ -31,7 +31,6 @@ import java.util.Random;
 
 public class BlockTFTowerTranslucent extends Block implements ModelRegisterCallback {
 	public static final PropertyEnum<TowerTranslucentVariant> VARIANT = PropertyEnum.create("variant", TowerTranslucentVariant.class);
-	private static final Random sideRNG = new Random();
 	private static final AxisAlignedBB REAPPEARING_BB = new AxisAlignedBB(0.375F, 0.375F, 0.375F, 0.625F, 0.625F, 0.625F);
 
 	public BlockTFTowerTranslucent() {
@@ -105,9 +104,6 @@ public class BlockTFTowerTranslucent extends Block implements ModelRegisterCallb
 
 		if (variant == TowerTranslucentVariant.REAPPEARING_INACTIVE || variant == TowerTranslucentVariant.REAPPEARING_ACTIVE) {
 			return REAPPEARING_BB;
-		} else if (variant == TowerTranslucentVariant.REACTOR_DEBRIS) {
-			return new AxisAlignedBB(sideRNG.nextFloat() * 0.4F, sideRNG.nextFloat() * 0.4F, sideRNG.nextFloat() * 0.4F,
-					1.0F - sideRNG.nextFloat() * 0.4F, 1.0F - sideRNG.nextFloat() * 0.4F, 1.0F - sideRNG.nextFloat() * 0.4F);
 		} else {
 			return FULL_BLOCK_AABB;
 		}

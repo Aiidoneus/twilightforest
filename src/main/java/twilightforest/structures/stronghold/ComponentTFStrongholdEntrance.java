@@ -5,6 +5,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 	public ComponentTFStrongholdEntrance() {
 	}
 
-	public ComponentTFStrongholdEntrance(World world, Random rand, int i, int x, int y, int z) {
-		super(i, EnumFacing.SOUTH, x, y - 10, z);
+	public ComponentTFStrongholdEntrance(TFFeature feature, World world, Random rand, int i, int x, int y, int z) {
+		super(feature, i, EnumFacing.SOUTH, x, y - 10, z);
 
 		this.deco = new StructureTFDecoratorStronghold();
 
@@ -26,7 +27,7 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 	}
 
 	@Override
-	public void buildComponent(StructureComponent parent, List list, Random random) {
+	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random random) {
 		super.buildComponent(parent, list, random);
 
 		// make a random component in each direction
@@ -50,7 +51,6 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 		if (!listContainsBossRoom(list)) {
 			TwilightForestMod.LOGGER.info("Did not find boss room from exit 3 - EPIC FAIL");
 		}
-		List<StructureTFStrongholdComponent> pieceList = (List<StructureTFStrongholdComponent>) list;
 		StructureBoundingBox shieldBox = new StructureBoundingBox(this.boundingBox);
 
 		int tStairs = 0;
@@ -60,7 +60,7 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 		int bossRooms = 0;
 
 		// compute and generate MEGASHIELD
-		for (StructureTFStrongholdComponent component : pieceList) {
+		for (StructureComponent component : list) {
 			shieldBox.expandTo(component.getBoundingBox());
 
 
@@ -88,15 +88,15 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 //		list.add(shield);
 
 		// add the upper stronghold
-		StructureTFStrongholdComponent accessChamber = new ComponentTFStrongholdAccessChamber(2, this.getCoordBaseMode(), boundingBox.minX + 8, boundingBox.minY + 7, boundingBox.minZ + 4);
+		StructureTFStrongholdComponent accessChamber = new ComponentTFStrongholdAccessChamber(getFeatureType(), 2, this.getCoordBaseMode(), boundingBox.minX + 8, boundingBox.minY + 7, boundingBox.minZ + 4);
 		list.add(accessChamber);
 		accessChamber.buildComponent(this, list, random);
 
 
 	}
 
-	private boolean listContainsBossRoom(List list) {
-		for (StructureTFStrongholdComponent component : (List<StructureTFStrongholdComponent>) list) {
+	private boolean listContainsBossRoom(List<StructureComponent> list) {
+		for (StructureComponent component : list) {
 			if (component instanceof ComponentTFStrongholdBossRoom) {
 				return true;
 			}

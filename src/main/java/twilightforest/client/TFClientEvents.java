@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -21,6 +22,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
+import twilightforest.entity.EntityTFPinchBeetle;
+import twilightforest.entity.EntityTFYeti;
+import twilightforest.entity.boss.EntityTFYetiAlpha;
 import twilightforest.item.ItemTFBowBase;
 import twilightforest.world.WorldProviderTwilightForest;
 
@@ -44,13 +48,14 @@ public class TFClientEvents {
 		evt.getMap().registerSprite(new ResourceLocation(TwilightForestMod.ID, "particles/snow_2"));
 		evt.getMap().registerSprite(new ResourceLocation(TwilightForestMod.ID, "particles/snow_3"));
 		evt.getMap().registerSprite(new ResourceLocation(TwilightForestMod.ID, "particles/annihilate_particle"));
+		evt.getMap().registerSprite(new ResourceLocation(TwilightForestMod.ID, "particles/firefly"));
 	}
 
 	/**
 	 * Do ice effect on slowed monsters
 	 */
 	@SubscribeEvent
-	public static void renderLivingPost(RenderLivingEvent.Post event) {
+	public static void renderLivingPost(RenderLivingEvent.Post<EntityLivingBase> event) {
 		boolean hasSlowness = event.getEntity().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).hasModifier(SLOWNESS_POTION_MODIFIER);
 		boolean showParticles = event.getEntity().getDataManager().get(EntityLivingBase.HIDE_PARTICLES);
 		if (hasSlowness && showParticles) {
@@ -81,7 +86,7 @@ public class TFClientEvents {
 	 * Render an entity with the ice effect.
 	 * This just displays a bunch of ice cubes around on their model
 	 */
-	private static void renderIcedEntity(EntityLivingBase entity, RenderLivingBase renderer, double x, double y, double z) {
+	private static void renderIcedEntity(EntityLivingBase entity, RenderLivingBase<EntityLivingBase> renderer, double x, double y, double z) {
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -115,22 +120,42 @@ public class TFClientEvents {
 	 * On the tick, we kill the vignette
 	 */
 	@SubscribeEvent
-	public static void clientTick(TickEvent.ClientTickEvent event) {
-		Minecraft mc = Minecraft.getMinecraft();
-		World world = mc.world;
+	public static void renderTick(TickEvent.RenderTickEvent event) {
+		if (event.phase == TickEvent.Phase.START) {
+			Minecraft mc = Minecraft.getMinecraft();
+			World world = mc.world;
 
-		((BlockLeaves) TFBlocks.leaves).setGraphicsLevel(mc.gameSettings.fancyGraphics);
-		((BlockLeaves) TFBlocks.leaves3).setGraphicsLevel(mc.gameSettings.fancyGraphics);
-		((BlockLeaves) TFBlocks.magicLeaves).setGraphicsLevel(mc.gameSettings.fancyGraphics);
+			((BlockLeaves) TFBlocks.leaves).setGraphicsLevel(mc.gameSettings.fancyGraphics);
+			((BlockLeaves) TFBlocks.leaves3).setGraphicsLevel(mc.gameSettings.fancyGraphics);
+			((BlockLeaves) TFBlocks.magicLeaves).setGraphicsLevel(mc.gameSettings.fancyGraphics);
 
-		// only fire if we're in the twilight forest
-		if (world != null && (world.provider instanceof WorldProviderTwilightForest)) {
-			// vignette
-			if (mc.ingameGUI != null) {
-				mc.ingameGUI.prevVignetteBrightness = 0.0F;
+			// only fire if we're in the twilight forest
+			if (world != null && (world.provider instanceof WorldProviderTwilightForest)) {
+				// vignette
+				if (mc.ingameGUI != null) {
+					mc.ingameGUI.prevVignetteBrightness = 0.0F;
+				}
+			}//*/
+
+			if (mc.player != null) {
+				Entity riding = mc.player.getRidingEntity();
+				if (riding instanceof EntityTFPinchBeetle || riding instanceof EntityTFYeti || riding instanceof EntityTFYetiAlpha) {
+					mc.ingameGUI.setOverlayMessage("", false);
+				}
 			}
-
 		}
 	}
 
+	@SubscribeEvent
+	public static void clientTick(TickEvent.ClientTickEvent event) {
+
+		rotationTicker = rotationTicker >= 359.0F ? 0.0F : rotationTicker + 0.5F;
+		sineTicker = sineTicker >= SINE_TICKER_BOUND ? 0.0F : sineTicker + 0.5F;
+
+		BugModelAnimationHelper.animate();
+	}
+
+	public static float rotationTicker = 0;
+	public static float sineTicker = 0;
+	public static final float SINE_TICKER_BOUND = (float) (Math.PI * 200.0F) - 1.0F;
 }

@@ -5,7 +5,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.TFFeature;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.lichtower.ComponentTFTowerRoof;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 
@@ -14,8 +15,8 @@ import java.util.Random;
 
 public class ComponentTFTowerRoofMushroom extends ComponentTFTowerRoof {
 
-	public ComponentTFTowerRoofMushroom(int i, ComponentTFTowerWing wing, float pHang) {
-		super(i, wing);
+	public ComponentTFTowerRoofMushroom(TFFeature feature, int i, ComponentTFTowerWing wing, float pHang) {
+		super(feature, i, wing);
 
 		this.height = wing.size;
 
@@ -30,9 +31,9 @@ public class ComponentTFTowerRoofMushroom extends ComponentTFTowerRoof {
 	}
 
 	@Override
-	public void buildComponent(StructureComponent parent, List list, Random rand) {
-		if (parent != null && parent instanceof StructureTFComponent) {
-			this.deco = ((StructureTFComponent) parent).deco;
+	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
+		if (parent != null && parent instanceof StructureTFComponentOld) {
+			this.deco = ((StructureTFComponentOld) parent).deco;
 		}
 	}
 

@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
@@ -15,7 +14,6 @@ import net.minecraft.world.EnumDifficulty;
 public abstract class TileEntityTFBossSpawner extends TileEntity implements ITickable {
 
 	protected ResourceLocation mobID = new ResourceLocation("minecraft:pig");
-	private int counter;
 	protected Entity displayCreature = null;
 
 	public boolean anyPlayerInRange() {
@@ -24,7 +22,6 @@ public abstract class TileEntityTFBossSpawner extends TileEntity implements ITic
 
 	@Override
 	public void update() {
-		this.counter++;
 
 		if (anyPlayerInRange()) {
 			if (world.isRemote) {
@@ -55,6 +52,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity implements ITic
 		double ry = pos.getY() + 0.5D;
 		double rz = pos.getZ() + 0.5D;
 		myCreature.setLocationAndAngles(rx, ry, rz, world.rand.nextFloat() * 360F, 0.0F);
+		myCreature.onInitialSpawn(world.getDifficultyForLocation(pos), null);
 
 		// set creature's home to this
 		initializeCreature(myCreature);

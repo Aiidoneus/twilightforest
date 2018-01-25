@@ -5,14 +5,14 @@
       "data": 3
     },
     "title": {
-      "translate": "advancement.twilightProgressUrghast"
+      "translate": "advancement.twilight_progress_urghast"
     },
     "description": {
-      "translate": "advancement.twilightProgressUrghast.desc"
+      "translate": "advancement.twilight_progress_urghast.desc"
     },
     "frame": "goal"
   },
-  "parent": "twilightforest:progress_knights",
+  "parent": "twilightforest:ghast_trap",
   "criteria": {
     "ghast": {
       "trigger": "minecraft:player_killed_entity",
@@ -21,6 +21,37 @@
           "type": "twilightforest:ur_ghast"
         }
       }
+    },
+    "trophy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "twilightforest:trophy",
+            "data": 3
+          }
+        ]
+      }
+    },
+    "tear": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "twilightforest:fiery_tears"
+          }
+        ]
+      }
+    },
+    "previous_progression": {
+      "trigger": "twilightforest:has_advancement",
+      "conditions": {
+        "advancement": "twilightforest:progress_knights"
+      }
     }
-  }
+  },
+  "requirements": [
+    [ "ghast", "trophy", "tear" ],
+    [ "previous_progression" ]
+  ]
 }

@@ -4,13 +4,13 @@ import net.minecraft.block.BlockHugeMushroom;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import twilightforest.TFFeature;
 import twilightforest.TFTreasure;
 import twilightforest.block.BlockTFBossSpawner;
 import twilightforest.block.TFBlocks;
-import twilightforest.block.enums.BossVariant;
+import twilightforest.enums.BossVariant;
 
 import java.util.Random;
 
@@ -19,12 +19,11 @@ public class ComponentTFMazeRoomBoss extends ComponentTFMazeRoom {
 
 	public ComponentTFMazeRoomBoss() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 
-	public ComponentTFMazeRoomBoss(int i, Random rand, int x, int y, int z) {
-		super(i, rand, x, y, z);
+	public ComponentTFMazeRoomBoss(TFFeature feature, int i, Random rand, int x, int y, int z) {
+		super(feature, i, rand, x, y, z);
 	}
 
 

@@ -1,13 +1,14 @@
 {
   "display": {
     "icon": {
-      "item": "twilightforest:phantom_helmet"
+      "item": "twilightforest:trophy",
+      "data": 4
     },
     "title": {
-      "translate": "advancement.twilightProgressKnights"
+      "translate": "advancement.twilight_progress_knights"
     },
     "description": {
-      "translate": "advancement.twilightProgressKnights.desc"
+      "translate": "advancement.twilight_progress_knights.desc"
     },
     "frame": "goal"
   },
@@ -19,6 +20,12 @@
         "entity": {
           "type": "twilightforest:knight_phantom"
         }
+      }
+    },
+    "previous_progression": {
+      "trigger": "twilightforest:has_advancement",
+      "conditions": {
+        "advancement": "twilightforest:progress_trophy_pedestal"
       }
     }
   }

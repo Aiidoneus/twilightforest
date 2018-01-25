@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -20,24 +21,24 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import twilightforest.block.enums.TowerDeviceVariant;
-import twilightforest.block.enums.TowerTranslucentVariant;
+import twilightforest.advancements.TFAdvancements;
+import twilightforest.enums.TowerDeviceVariant;
+import twilightforest.enums.TowerTranslucentVariant;
 import twilightforest.client.ModelRegisterCallback;
 import twilightforest.client.ModelUtils;
 import twilightforest.item.TFItems;
-import twilightforest.tileentity.TileEntityTFCReactorActive;
-import twilightforest.tileentity.TileEntityTFGhastTrapActive;
-import twilightforest.tileentity.TileEntityTFGhastTrapInactive;
-import twilightforest.tileentity.TileEntityTFReverter;
-import twilightforest.tileentity.TileEntityTFTowerBuilder;
+import twilightforest.tileentity.*;
+import twilightforest.tileentity.TileEntityTFAntibuilder;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
@@ -143,9 +144,7 @@ public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
 	/**
 	 * Are any of the 26 adjacent blocks a locked vanishing block?
 	 */
-	public static boolean areNearbyLockBlocks(World world, BlockPos pos) {
-		boolean locked = false;
-
+	private static boolean areNearbyLockBlocks(World world, BlockPos pos) {
 		//TODO: this is hacky.  We really need to determine the exact blocks of the door and check those for locks.
 		for (int dx = -2; dx <= 2; dx++) {
 			for (int dy = -2; dy <= 2; dy++) {
@@ -153,13 +152,13 @@ public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
 					IBlockState state = world.getBlockState(pos.add(dx, dy, dz));
 					if (state.getBlock() == TFBlocks.towerDevice
 							&& state.getValue(VARIANT) == TowerDeviceVariant.VANISH_LOCKED) {
-						locked = true;
+						return true;
 					}
 				}
 			}
 		}
 
-		return locked;
+		return false;
 	}
 
 	/**
@@ -202,44 +201,49 @@ public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
 
 	@Override
 	@Deprecated
-	public void neighborChanged(IBlockState state, World par1World, BlockPos pos, Block myBlockID, BlockPos fromPos) {
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos fromPos) {
 		TowerDeviceVariant variant = state.getValue(VARIANT);
 
-		if (!par1World.isRemote) {
-			if (variant == TowerDeviceVariant.VANISH_INACTIVE && par1World.isBlockIndirectlyGettingPowered(pos) > 0 && !areNearbyLockBlocks(par1World, pos)) {
-				changeToActiveVanishBlock(par1World, pos, TowerDeviceVariant.VANISH_ACTIVE);
+		if (!world.isRemote) {
+			if (variant == TowerDeviceVariant.VANISH_INACTIVE && world.isBlockIndirectlyGettingPowered(pos) > 0 && !areNearbyLockBlocks(world, pos)) {
+				changeToActiveVanishBlock(world, pos, TowerDeviceVariant.VANISH_ACTIVE);
 			}
 
-			if (variant == TowerDeviceVariant.REAPPEARING_INACTIVE && par1World.isBlockIndirectlyGettingPowered(pos) > 0 && !areNearbyLockBlocks(par1World, pos)) {
-				changeToActiveVanishBlock(par1World, pos, TowerDeviceVariant.REAPPEARING_ACTIVE);
+			if (variant == TowerDeviceVariant.REAPPEARING_INACTIVE && world.isBlockIndirectlyGettingPowered(pos) > 0 && !areNearbyLockBlocks(world, pos)) {
+				changeToActiveVanishBlock(world, pos, TowerDeviceVariant.REAPPEARING_ACTIVE);
 			}
 
-			if (variant == TowerDeviceVariant.BUILDER_INACTIVE && par1World.isBlockIndirectlyGettingPowered(pos) > 0) {
-				changeToBlockMeta(par1World, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_ACTIVE));
-				par1World.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
+			if (variant == TowerDeviceVariant.BUILDER_INACTIVE && world.isBlockIndirectlyGettingPowered(pos) > 0) {
+				changeToBlockMeta(world, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_ACTIVE));
+				world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
 
-				par1World.scheduleUpdate(pos, this, 4);
+				world.scheduleUpdate(pos, this, 4);
 			}
 
-			if (variant == TowerDeviceVariant.BUILDER_ACTIVE && par1World.isBlockIndirectlyGettingPowered(pos) == 0) {
-				changeToBlockMeta(par1World, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_INACTIVE));
-				par1World.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.6F);
-				par1World.scheduleUpdate(pos, this, 4);
+			if (variant == TowerDeviceVariant.BUILDER_ACTIVE && world.isBlockIndirectlyGettingPowered(pos) == 0) {
+				changeToBlockMeta(world, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_INACTIVE));
+				world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.6F);
+				world.scheduleUpdate(pos, this, 4);
 			}
 
-			if (variant == TowerDeviceVariant.BUILDER_TIMEOUT && par1World.isBlockIndirectlyGettingPowered(pos) == 0) {
-				changeToBlockMeta(par1World, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_INACTIVE));
+			if (variant == TowerDeviceVariant.BUILDER_TIMEOUT && world.isBlockIndirectlyGettingPowered(pos) == 0) {
+				changeToBlockMeta(world, pos, state.withProperty(VARIANT, TowerDeviceVariant.BUILDER_INACTIVE));
 			}
 
-			if (variant == TowerDeviceVariant.GHASTTRAP_INACTIVE && isInactiveTrapCharged(par1World, pos) && par1World.isBlockIndirectlyGettingPowered(pos) > 0) {
-				changeToBlockMeta(par1World, pos, state.withProperty(VARIANT, TowerDeviceVariant.GHASTTRAP_ACTIVE));
-				par1World.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
-				par1World.scheduleUpdate(pos, this, 4);
+			if (variant == TowerDeviceVariant.GHASTTRAP_INACTIVE && isInactiveTrapCharged(world, pos) && world.isBlockIndirectlyGettingPowered(pos) > 0) {
+				List<Entity> entities = world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(pos.getX() - 6, pos.getY() - 6, pos.getZ() - 6, pos.getX() + 6, pos.getZ() + 6, pos.getZ() + 6));
+				for (Entity entity : entities)
+					if (entity instanceof EntityPlayerMP)
+						TFAdvancements.ACTIVATED_GHAST_TRAP.trigger((EntityPlayerMP) entity);
+
+				changeToBlockMeta(world, pos, state.withProperty(VARIANT, TowerDeviceVariant.GHASTTRAP_ACTIVE));
+				world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
+				world.scheduleUpdate(pos, this, 4);
 			}
 
-			if (variant == TowerDeviceVariant.REACTOR_INACTIVE && isReactorReady(par1World, pos)) {
+			if (variant == TowerDeviceVariant.REACTOR_INACTIVE && isReactorReady(world, pos)) {
 				// check if we should fire up the reactor
-				changeToBlockMeta(par1World, pos, state.withProperty(VARIANT, TowerDeviceVariant.REACTOR_ACTIVE));
+				changeToBlockMeta(world, pos, state.withProperty(VARIANT, TowerDeviceVariant.REACTOR_ACTIVE));
 			}
 		}
 	}
@@ -439,7 +443,7 @@ public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
 		if (variant == TowerDeviceVariant.BUILDER_ACTIVE) {
 			return new TileEntityTFTowerBuilder();
 		} else if (variant == TowerDeviceVariant.ANTIBUILDER) {
-			return new TileEntityTFReverter();
+			return new TileEntityTFAntibuilder();
 		} else if (variant == TowerDeviceVariant.GHASTTRAP_INACTIVE) {
 			return new TileEntityTFGhastTrapInactive();
 		} else if (variant == TowerDeviceVariant.GHASTTRAP_ACTIVE) {
@@ -479,6 +483,8 @@ public class BlockTFTowerDevice extends Block implements ModelRegisterCallback {
 				break;
 			case REACTOR_ACTIVE:
 				state = state.withProperty(VARIANT, TowerDeviceVariant.REACTOR_INACTIVE);
+				break;
+			default:
 				break;
 		}
 

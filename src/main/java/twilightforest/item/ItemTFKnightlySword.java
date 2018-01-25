@@ -3,7 +3,6 @@ package twilightforest.item;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,7 +38,7 @@ public class ItemTFKnightlySword extends ItemSword implements ModelRegisterCallb
 		if (!target.world.isRemote && evt.getSource().getImmediateSource() instanceof EntityLivingBase) {
 			ItemStack weapon = ((EntityLivingBase) evt.getSource().getImmediateSource()).getHeldItemMainhand();
 
-			if (target.getTotalArmorValue() > 0 && !weapon.isEmpty() && (weapon.getItem() == TFItems.knightlyAxe || weapon.getItem() == TFItems.knightlyPick || weapon.getItem() == TFItems.knightlySword)) {
+			if (!weapon.isEmpty() && ((target.getTotalArmorValue() > 0 && (weapon.getItem() == TFItems.knightlyPick || weapon.getItem() == TFItems.knightlySword)) || (target.getTotalArmorValue() == 0 && weapon.getItem() == TFItems.knightlyAxe))) {
 				// TODO scale bonus dmg with the amount of armor?
 				target.attackEntityFrom(DamageSource.MAGIC, BONUS_DAMAGE);
 				// don't prevent main damage from applying

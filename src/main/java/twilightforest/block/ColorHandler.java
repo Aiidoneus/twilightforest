@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.ColorizerGrass;
@@ -12,7 +13,11 @@ import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
-import twilightforest.block.enums.*;
+import twilightforest.enums.Leaves3Variant;
+import twilightforest.enums.LeavesVariant;
+import twilightforest.enums.MagicWoodVariant;
+import twilightforest.enums.TowerWoodVariant;
+import twilightforest.item.ItemTFArcticArmor;
 import twilightforest.item.TFItems;
 
 import java.awt.*;
@@ -143,16 +148,8 @@ public final class ColorHandler {
 			if (worldIn == null || pos == null || state.getValue(BlockTFTowerWood.VARIANT) == TowerWoodVariant.ENCASED) {
 				return -1;
 			} else {
-				// stripes!
-				int value = pos.getX() * 31 + pos.getY() * 15 + pos.getZ() * 33;
-				if ((value & 256) != 0) {
-					value = 255 - (value & 255);
-				}
-				value &= 255;
-				value = value >> 1;
-				value |= 128;
-
-				return value << 16 | value << 8 | value;
+				float f = BlockTFAuroraBrick.rippleFractialNoise(2, 32.0f, pos, 0.4f, 1.0f, 2f);
+				return Color.HSBtoRGB(0.1f, 1f - f, (f + 2f) / 3f);
 			}
 		}, TFBlocks.towerWood);
 		blockColors.registerBlockColorHandler((state, world, pos, tintIndex) -> {
@@ -219,9 +216,6 @@ public final class ColorHandler {
 			}
 		}, TFBlocks.leaves);
 		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
-			if (tintIndex > 15) return 0xFFFFFF;
-			// todo 1.9 wrong meta values?
-			// return (meta & 3) == 1 ? ColorizerFoliage.getFoliageColorPine() : ((meta & 3) == 2 ? ColorizerFoliage.getFoliageColorBirch() : super.getRenderColor(meta));;
 			Leaves3Variant variant = state.getValue(BlockTFLeaves3.VARIANT);
 			return variant == Leaves3Variant.THORN ? ColorizerFoliage.getFoliageColorPine()
 					: variant == Leaves3Variant.BEANSTALK ? ColorizerFoliage.getFoliageColorBirch()
@@ -263,10 +257,36 @@ public final class ColorHandler {
 			}
 		}, TFBlocks.castleDoor, TFBlocks.castleDoorVanished);
 
+		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
+			if (tintIndex > 15) return 0xFFFFFF;
+
+			switch (state.getValue(BlockTFForceField.COLOR)) {
+				case PURPLE:
+					return 0x5C1074;
+				case PINK:
+					return 0xFA057E;
+				case ORANGE:
+					return 0xFF5B02;
+				case GREEN:
+					return 0x89E701;
+				case BLUE:
+					return 0x0DDEFF;
+				default:
+					TwilightForestMod.LOGGER.info("Magic happened. Got " + state.getValue(BlockTFForceField.COLOR).getName() + " for Forcefield");
+					return state.getValue(BlockTFForceField.COLOR).getColorValue();
+			}
+		}, TFBlocks.forceField);
+
 		ItemColors itemColors = Minecraft.getMinecraft().getItemColors();
 		// Atomic: This is one place where getStateFromMeta is still commonly used
-		itemColors.registerItemColorHandler((stack, tintIndex) -> blockColors.colorMultiplier(((ItemBlock)stack.getItem()).getBlock().getStateFromMeta(stack.getMetadata()), null, null, tintIndex), TFBlocks.auroraBlock, TFBlocks.auroraPillar, TFBlocks.auroraSlab, TFBlocks.darkleaves, TFBlocks.giantLeaves, TFBlocks.fireJet, TFBlocks.magicLeaves, TFBlocks.leaves, TFBlocks.leaves3, TFBlocks.plant, TFBlocks.castleMagic, TFBlocks.castleDoor, TFBlocks.castleDoorVanished, TFBlocks.miniature_structure);
+		itemColors.registerItemColorHandler((stack, tintIndex) -> blockColors.colorMultiplier(((ItemBlock)stack.getItem()).getBlock().getStateFromMeta(stack.getMetadata()), null, null, tintIndex), TFBlocks.auroraBlock, TFBlocks.auroraPillar, TFBlocks.auroraSlab, TFBlocks.darkleaves, TFBlocks.giantLeaves, TFBlocks.fireJet, TFBlocks.magicLeaves, TFBlocks.leaves, TFBlocks.leaves3, TFBlocks.plant, TFBlocks.castleMagic, TFBlocks.castleDoor, TFBlocks.castleDoorVanished, TFBlocks.miniature_structure, TFBlocks.forceField);
 		// Honestly I'd say it makes sense in this context. -Drullkus
+
+		itemColors.registerItemColorHandler((ItemStack stack, int tintIndex) ->
+				stack.getItem() instanceof ItemTFArcticArmor
+						? ((ItemTFArcticArmor) stack.getItem()).getColor(stack, tintIndex)
+						: 0xFFFFFF,
+				TFItems.arcticHelm, TFItems.arcticPlate, TFItems.arcticLegs, TFItems.arcticBoots);
 	}
 
 	private ColorHandler() {

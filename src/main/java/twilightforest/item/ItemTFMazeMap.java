@@ -29,12 +29,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import twilightforest.TFMazeMapData;
 import twilightforest.TFPacketHandler;
 import twilightforest.client.ModelRegisterCallback;
-import twilightforest.network.PacketMapRewrap;
+import twilightforest.network.PacketMazeMap;
 
 import javax.annotation.Nullable;
 
 public class ItemTFMazeMap extends ItemMap implements ModelRegisterCallback {
-	private static final String STR_ID = "map";
+	private static final String STR_ID = "mazemap";
 	private static final int YSEARCH = 3;
 	protected boolean mapOres;
 
@@ -92,6 +92,7 @@ public class ItemTFMazeMap extends ItemMap implements ModelRegisterCallback {
 	}
 
 	// [VanillaCopy] of superclass, with sane variable names and noted changes
+	@SuppressWarnings("unused")
 	@Override
 	public void updateMapData(World world, Entity viewer, MapData data) {
 		if (world.provider.getDimension() == data.dimension && viewer instanceof EntityPlayer) {
@@ -286,15 +287,10 @@ public class ItemTFMazeMap extends ItemMap implements ModelRegisterCallback {
 	public Packet<?> createMapDataPacket(ItemStack stack, World worldIn, EntityPlayer player) {
 		Packet<?> p = super.createMapDataPacket(stack, worldIn, player);
 		if (p instanceof SPacketMaps) {
-			return TFPacketHandler.CHANNEL.getPacketFrom(new PacketMapRewrap(true, (SPacketMaps) p));
+			return TFPacketHandler.CHANNEL.getPacketFrom(new PacketMazeMap((SPacketMaps) p));
 		} else {
 			return p;
 		}
-	}
-
-	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return ("" + net.minecraft.util.text.translation.I18n.translateToLocal(this.getUnlocalizedNameInefficiently(stack) + ".name").trim() + " #" + stack.getItemDamage());
 	}
 
 	@SideOnly(Side.CLIENT)

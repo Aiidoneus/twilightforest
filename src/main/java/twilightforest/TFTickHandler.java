@@ -21,12 +21,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import twilightforest.advancements.TFAdvancements;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.BlockTFPortal;
 import twilightforest.block.TFBlocks;
 import twilightforest.network.PacketStructureProtection;
 import twilightforest.network.PacketStructureProtectionClear;
-import twilightforest.util.PlayerHelper;
 import twilightforest.util.StructureBoundingBoxUtils;
 import twilightforest.world.ChunkGeneratorTwilightForest;
 import twilightforest.world.TFWorld;
@@ -43,10 +43,10 @@ public class TFTickHandler {
 		World world = player.world;
 
 		// check for portal creation, at least if it's not disabled
-		if (!TFConfig.disablePortalCreation && event.phase == TickEvent.Phase.END && !world.isRemote && world.getWorldTime() % 20 == 0) {
+		if (!world.isRemote && !TFConfig.disablePortalCreation && event.phase == TickEvent.Phase.END && player.ticksExisted % 20 == 0) {
 			// skip non admin players when the option is on
 			if (TFConfig.adminOnlyPortals) {
-				if (FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null) {
+				if (FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile()) != 0) {
 					// reduce range to 4.0 when the option is on
 					checkForPortalCreation(player, world, 4.0F);
 				}
@@ -57,15 +57,21 @@ public class TFTickHandler {
 		}
 
 		// check the player for being in a forbidden progression area, only every 20 ticks
-		if (!world.isRemote && event.phase == TickEvent.Phase.END && world.getWorldTime() % 20 == 0
+		if (!world.isRemote && event.phase == TickEvent.Phase.END && player.ticksExisted % 20 == 0
 				&& world.getGameRules().getBoolean(TwilightForestMod.ENFORCED_PROGRESSION_RULE)
 				&& world.provider instanceof WorldProviderTwilightForest
 				&& !player.isCreative() && !player.isSpectator()) {
 			checkBiomeForProgression(player, world);
 		}
 
+		// check for advancement get.
+		if (event.phase == TickEvent.Phase.END && player.ticksExisted % 50 == 0
+				&& player instanceof EntityPlayerMP) {
+			TFAdvancements.ADVANCEMENT_UNLOCKED.trigger((EntityPlayerMP) player);
+		}
+
 		// check and send nearby forbidden structures, every 100 ticks or so
-		if (!world.isRemote && event.phase == TickEvent.Phase.END && world.getWorldTime() % 100 == 0 && world.getGameRules().getBoolean(TwilightForestMod.ENFORCED_PROGRESSION_RULE)) {
+		if (!world.isRemote && event.phase == TickEvent.Phase.END && player.ticksExisted % 100 == 0 && world.getGameRules().getBoolean(TwilightForestMod.ENFORCED_PROGRESSION_RULE)) {
 			if (world.provider instanceof WorldProviderTwilightForest) {
 				if (player.isCreative() || player.isSpectator()) {
 					sendAllClearPacket(world, player);
@@ -97,7 +103,6 @@ public class TFTickHandler {
 		ChunkGeneratorTwilightForest chunkProvider = (ChunkGeneratorTwilightForest) uncheckedChunkProvider;
 
 		int px = MathHelper.floor(player.posX);
-		int py = MathHelper.floor(player.posY);
 		int pz = MathHelper.floor(player.posZ);
 
 		if (chunkProvider != null && chunkProvider.isBlockNearFullStructure(px, pz, 100)) {
@@ -123,17 +128,22 @@ public class TFTickHandler {
 	}
 
 	private static void checkForPortalCreation(EntityPlayer player, World world, float rangeToCheck) {
-		if ((world.provider.getDimension() == 0 || world.provider.getDimension() == TFConfig.dimension.dimensionID
-				|| TFConfig.allowPortalsInOtherDimensions)) {
+		if (world.provider.getDimension() == 0
+				|| world.provider.getDimension() == TFConfig.dimension.dimensionID
+				|| TFConfig.allowPortalsInOtherDimensions) {
 			Item item = Item.REGISTRY.getObject(new ResourceLocation(TFConfig.portalCreationItem));
+			int metadata = TFConfig.portalCreationMeta;
 			if (item == null) {
 				item = Items.DIAMOND;
+				metadata = -1;
 			}
 
-			List<EntityItem> itemList = world.getEntitiesWithinAABB(EntityItem.class, player.getEntityBoundingBox().grow(rangeToCheck, rangeToCheck, rangeToCheck));
+			final List<EntityItem> itemList = world.getEntitiesWithinAABB(EntityItem.class, player.getEntityBoundingBox().grow(rangeToCheck, rangeToCheck, rangeToCheck));
 
-			for (EntityItem entityItem : itemList) {
-				if (item == entityItem.getItem().getItem() && world.isMaterialInBB(entityItem.getEntityBoundingBox(), Material.WATER)) {
+			for (final EntityItem entityItem : itemList) {
+				if (item == entityItem.getItem().getItem()
+						&& world.isMaterialInBB(entityItem.getEntityBoundingBox(), Material.WATER)
+						&& (metadata == -1 || entityItem.getItem().getMetadata() == metadata)) {
 					Random rand = new Random();
 					for (int k = 0; k < 2; k++) {
 						double d = rand.nextGaussian() * 0.02D;
@@ -143,9 +153,9 @@ public class TFTickHandler {
 						world.spawnParticle(EnumParticleTypes.SPELL, entityItem.posX, entityItem.posY + 0.2, entityItem.posZ, d, d1, d2);
 					}
 
-					if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(world, new BlockPos(entityItem))) {
-						//FIXME add actual trigger for json data-driven based achievement grant
-						PlayerHelper.grantAdvancement((EntityPlayerMP) player, new ResourceLocation(TwilightForestMod.ID, "root"));
+					if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(world, new BlockPos(entityItem), entityItem)) {
+						TFAdvancements.MADE_TF_PORTAL.trigger((EntityPlayerMP) player);
+						return;
 					}
 				}
 			}

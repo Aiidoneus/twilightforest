@@ -10,8 +10,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
-import twilightforest.block.enums.DeadrockVariant;
-import twilightforest.block.enums.ThornVariant;
+import twilightforest.enums.DeadrockVariant;
+import twilightforest.enums.ThornVariant;
 
 import static java.util.Arrays.stream;
 import static net.minecraft.init.MobEffects.REGENERATION;
@@ -142,10 +142,9 @@ public class TFRegisterItemEvent {
 		// register blocks with their pickup values
 		items.registerSubItemBlock(TFBlocks.log);
 		items.registerSubItemBlock(TFBlocks.root);
-		items.registerSubItemBlock(TFBlocks.leaves);
-		//items.register("twilight_portal", new ItemTF().setUnlocalizedName("TFPortal").setCreativeTab(null));
-		items.registerBlock(TFBlocks.firefly);
-		items.registerBlock(TFBlocks.cicada);
+		items.register(new ItemBlockTFLeaves(TFBlocks.leaves));
+		items.register(new ItemBlockWearable(TFBlocks.firefly));
+		items.register(new ItemBlockWearable(TFBlocks.cicada));
 		items.registerSubItemBlock(TFBlocks.mazestone);
 		items.registerSubItemBlock(TFBlocks.hedge);
 		items.registerSubItemBlock(TFBlocks.bossSpawner);
@@ -155,9 +154,9 @@ public class TFRegisterItemEvent {
 		items.registerSubItemBlock(TFBlocks.fireJet);
 		items.registerSubItemBlock(TFBlocks.nagastone);
 		items.registerSubItemBlock(TFBlocks.sapling);
-		items.registerBlock(TFBlocks.moonworm);
+		items.register(new ItemBlockWearable(TFBlocks.moonworm));
 		items.registerSubItemBlock(TFBlocks.magicLog);
-		items.registerSubItemBlock(TFBlocks.magicLeaves);
+		items.register(new ItemBlockTFLeaves(TFBlocks.magicLeaves));
 		items.registerSubItemBlock(TFBlocks.magicLogSpecial);
 		items.registerSubItemBlock(TFBlocks.towerWood);
 		items.registerSubItemBlock(TFBlocks.towerDevice);
@@ -169,7 +168,7 @@ public class TFRegisterItemEvent {
 		items.register(new ItemMultiTexture(TFBlocks.thorns, TFBlocks.thorns, thornNames));
 		items.registerBlock(TFBlocks.burntThorns);
 		items.registerBlock(TFBlocks.thornRose);
-		items.registerSubItemBlock(TFBlocks.leaves3);
+		items.register(new ItemBlockTFLeaves(TFBlocks.leaves3));
 		items.register(new ItemMultiTexture(TFBlocks.deadrock, TFBlocks.deadrock, deadrockNames));
 		items.registerBlock(TFBlocks.darkleaves);
 		items.registerBlock(TFBlocks.auroraPillar);
@@ -177,10 +176,10 @@ public class TFRegisterItemEvent {
 		items.registerBlock(TFBlocks.trollSteinn);
 		items.registerBlock(TFBlocks.wispyCloud);
 		items.registerBlock(TFBlocks.fluffyCloud);
-		items.registerBlock(TFBlocks.giantCobble);
-		items.registerBlock(TFBlocks.giantLog);
-		items.registerBlock(TFBlocks.giantLeaves);
-		items.registerBlock(TFBlocks.giantObsidian);
+		items.register(new ItemTFGiantBlock(TFBlocks.giantCobble));
+		items.register(new ItemTFGiantBlock(TFBlocks.giantLog));
+		items.register(new ItemTFGiantBlock(TFBlocks.giantLeaves));
+		items.register(new ItemTFGiantBlock(TFBlocks.giantObsidian));
 		items.registerBlock(TFBlocks.uberousSoil);
 		items.registerBlock(TFBlocks.hugeStalk);
 		items.registerBlock(TFBlocks.hugeGloomBlock);
@@ -193,14 +192,26 @@ public class TFRegisterItemEvent {
 		items.registerSubItemBlock(TFBlocks.slider);
 		items.registerSubItemBlock(TFBlocks.castleBlock);
 		items.registerSubItemBlock(TFBlocks.castlePillar);
+		items.registerSubItemBlock(TFBlocks.castleStairs);
 		items.registerSubItemBlock(TFBlocks.castleMagic);
 		items.registerSubItemBlock(TFBlocks.forceField);
 		items.registerBlock(TFBlocks.cinderFurnace);
 		items.registerSubItemBlock(TFBlocks.cinderLog);
 		items.registerSubItemBlock(TFBlocks.castleDoor);
 		items.registerSubItemBlock(TFBlocks.castleDoorVanished);
-		items.registerSubItemBlock(TFBlocks.miniature_structure);
-
+		items.register(new ItemTFMiniatureStructure(TFBlocks.miniature_structure));
+		items.register(new ItemTFCompressed(TFBlocks.block_storage));
+		//items.registerBlock(TFBlocks.lapis_block);
+		items.registerBlock(TFBlocks.spiral_bricks);
+		items.registerBlock(TFBlocks.etched_nagastone);
+		items.registerBlock(TFBlocks.nagastone_pillar);
+		items.registerSubItemBlock(TFBlocks.nagastone_stairs);
+		items.registerBlock(TFBlocks.etched_nagastone_mossy);
+		items.registerBlock(TFBlocks.nagastone_pillar_mossy);
+		items.registerSubItemBlock(TFBlocks.nagastone_stairs_mossy);
+		items.registerBlock(TFBlocks.etched_nagastone_weathered);
+		items.registerBlock(TFBlocks.nagastone_pillar_weathered);
+		items.registerSubItemBlock(TFBlocks.nagastone_stairs_weathered);
 	}
 
 	private static class ItemRegistryHelper {
@@ -221,7 +232,11 @@ public class TFRegisterItemEvent {
 		}
 
 		private void registerSubItemBlock(Block block) {
-			ItemBlockTFMeta metaItemBlock = new ItemBlockTFMeta(block);
+			registerSubItemBlock(block, true);
+		}
+
+		private void registerSubItemBlock(Block block, boolean shouldAppendNumber) {
+			ItemBlockTFMeta metaItemBlock = new ItemBlockTFMeta(block).setAppend(shouldAppendNumber);
 			register(metaItemBlock);
 		}
 

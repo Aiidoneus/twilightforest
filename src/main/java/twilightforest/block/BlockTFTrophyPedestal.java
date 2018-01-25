@@ -6,28 +6,24 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import twilightforest.advancements.TFAdvancements;
 import twilightforest.TwilightForestMod;
-import twilightforest.block.enums.BossVariant;
 import twilightforest.client.ModelRegisterCallback;
 import twilightforest.item.TFItems;
-import twilightforest.tileentity.TileEntityTFTrophy;
-import twilightforest.util.PlayerHelper;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -35,7 +31,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class BlockTFTrophyPedestal extends Block implements ModelRegisterCallback {
 	public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
-	public static final PropertyEnum<BossVariant> BOSS = PropertyEnum.create("boss", BossVariant.class, BossVariant::hasTrophy);
 	public static final PropertyBool LATENT = PropertyBool.create("latent");
 
 	private static final AxisAlignedBB AABB = new AxisAlignedBB(0.0625F, 0.0F, 0.0625F, 0.9375F, 1.0F, 0.9375F);
@@ -46,12 +41,12 @@ public class BlockTFTrophyPedestal extends Block implements ModelRegisterCallbac
 		this.setResistance(2000.0F);
 		this.setSoundType(SoundType.STONE);
 		this.setCreativeTab(TFItems.creativeTab);
-		this.setDefaultState(getDefaultState().withProperty(LATENT, true).withProperty(FACING, EnumFacing.NORTH).withProperty(BOSS, BossVariant.NAGA));
+		this.setDefaultState(getDefaultState().withProperty(LATENT, true).withProperty(FACING, EnumFacing.NORTH));
 	}
 
 	@Override
 	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, FACING, LATENT, BOSS);
+		return new BlockStateContainer(this, FACING, LATENT);
 	}
 
 	@Override
@@ -72,30 +67,6 @@ public class BlockTFTrophyPedestal extends Block implements ModelRegisterCallbac
 			ret = ret.withProperty(LATENT, true);
 		}
 		return ret;
-	}
-
-	@Override
-	@Deprecated
-	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		IBlockState stateAbove = world.getBlockState(pos.up());
-		TileEntity tile = world.getTileEntity(pos);
-
-		if (stateAbove.getBlock() != TFBlocks.trophy || (!state.getValue(LATENT)) || tile == null || (!(tile instanceof TileEntityTFTrophy)))
-			return state;
-
-		TileEntityTFTrophy trophy = (TileEntityTFTrophy) tile;
-
-		BossVariant variant;
-
-		switch (trophy.getSkullType()) {
-			case 0:
-				variant = BossVariant.HYDRA;
-				break;
-			default:
-				variant = BossVariant.UR_GHAST;
-		}
-
-		return state.withProperty(BOSS, variant);
 	}
 
 	@Override
@@ -134,7 +105,7 @@ public class BlockTFTrophyPedestal extends Block implements ModelRegisterCallbac
 
 	private void warnIneligiblePlayers(World world, BlockPos pos) {
 		for (EntityPlayer player : world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(pos).grow(16.0D, 16.0D, 16.0D)))
-			if (!isPlayerEligible(player)) player.sendMessage(new TextComponentString("You are unworthy."));
+			if (!isPlayerEligible(player)) player.sendMessage(new TextComponentTranslation(TwilightForestMod.ID + ".trophyPedestal.ineligible"));
 	}
 
 	private boolean areNearbyPlayersEligible(World world, BlockPos pos) {
@@ -156,9 +127,8 @@ public class BlockTFTrophyPedestal extends Block implements ModelRegisterCallbac
 	}
 
 	private void rewardNearbyPlayers(World world, BlockPos pos) {
-		ResourceLocation adv = new ResourceLocation(TwilightForestMod.ID, "progress_trophy_pedestal");
 		for (EntityPlayerMP player : world.getEntitiesWithinAABB(EntityPlayerMP.class, new AxisAlignedBB(pos).grow(16.0D, 16.0D, 16.0D)))
-			PlayerHelper.grantAdvancement(player, adv);
+			TFAdvancements.PLACED_TROPHY_ON_PEDESTAL.trigger(player);
 	}
 
 	private void removeNearbyShields(World world, BlockPos pos) {

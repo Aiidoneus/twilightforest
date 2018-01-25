@@ -5,23 +5,24 @@ import net.minecraft.util.Rotation;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 import twilightforest.block.BlockTFCastleMagic;
 import twilightforest.block.BlockTFForceField;
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFComponentOld;
 import twilightforest.structures.StructureTFDecoratorCastle;
 import twilightforest.util.RotationUtil;
 
 import java.util.List;
 import java.util.Random;
 
-public class ComponentTFFinalCastleBossGazebo extends StructureTFComponent {
+public class ComponentTFFinalCastleBossGazebo extends StructureTFComponentOld {
 
 	public ComponentTFFinalCastleBossGazebo() {
 	}
 
-	public ComponentTFFinalCastleBossGazebo(Random rand, int i, StructureTFComponent keep) {
-		super(i);
+	public ComponentTFFinalCastleBossGazebo(TFFeature feature, Random rand, int i, StructureTFComponentOld keep) {
+		super(feature, i);
 		this.spawnListIndex = -1; // no monsters
 
 		this.setCoordBaseMode(keep.getCoordBaseMode());
@@ -30,7 +31,7 @@ public class ComponentTFFinalCastleBossGazebo extends StructureTFComponent {
 	}
 
 	@Override
-	public void buildComponent(StructureComponent parent, List list, Random rand) {
+	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
 		this.deco = new StructureTFDecoratorCastle();
 		this.deco.blockState = TFBlocks.castleMagic.getDefaultState().withProperty(BlockTFCastleMagic.COLOR, EnumDyeColor.BLUE);
 

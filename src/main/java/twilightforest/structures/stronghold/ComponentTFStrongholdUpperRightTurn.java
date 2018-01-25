@@ -5,6 +5,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+import twilightforest.TFFeature;
 
 import java.util.List;
 import java.util.Random;
@@ -15,8 +16,8 @@ public class ComponentTFStrongholdUpperRightTurn extends StructureTFStrongholdCo
 	public ComponentTFStrongholdUpperRightTurn() {
 	}
 
-	public ComponentTFStrongholdUpperRightTurn(int i, EnumFacing facing, int x, int y, int z) {
-		super(i, facing, x, y, z);
+	public ComponentTFStrongholdUpperRightTurn(TFFeature feature, int i, EnumFacing facing, int x, int y, int z) {
+		super(feature, i, facing, x, y, z);
 	}
 
 	@Override
@@ -25,7 +26,7 @@ public class ComponentTFStrongholdUpperRightTurn extends StructureTFStrongholdCo
 	}
 
 	@Override
-	public void buildComponent(StructureComponent parent, List list, Random random) {
+	public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random random) {
 		super.buildComponent(parent, list, random);
 
 		// make a random component to the right

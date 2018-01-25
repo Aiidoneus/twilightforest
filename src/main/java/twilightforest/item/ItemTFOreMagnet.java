@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import twilightforest.block.BlockTFRoots;
 import twilightforest.block.TFBlocks;
-import twilightforest.block.enums.RootVariant;
+import twilightforest.enums.RootVariant;
 import twilightforest.world.TFGenerator;
 
 import javax.annotation.Nonnull;
@@ -155,7 +155,7 @@ public class ItemTFOreMagnet extends ItemTF {
 				}
 			}
 
-			if (searchState.getBlock() != Blocks.AIR && isOre(searchState)) {
+			if (searchState.getBlock() != Blocks.AIR && isOre(searchState) && (world.getTileEntity(coord) == null)) {
 				foundState = searchState;
 				foundPos = coord;
 				break;

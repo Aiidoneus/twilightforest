@@ -45,8 +45,8 @@ public class MapGenTFMajorFeature extends MapGenStructure {
 	@Nullable
 	@Override
 	public BlockPos getNearestStructurePos(World worldIn, BlockPos pos, boolean findUnexplored) {
-		// todo 1.11
-		return null;
+		this.world = worldIn;
+		return findNearestStructurePosBySpacing(worldIn, this, pos, 20, 11, 10387313, true, 100, findUnexplored);
 	}
 
 	/**
@@ -95,6 +95,16 @@ public class MapGenTFMajorFeature extends MapGenStructure {
 		}
 
 		return boxFound;
+	}
+
+	public TFFeature getFeatureAt(BlockPos pos) {
+		for (StructureStart start : this.structureMap.values())
+			if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(pos.getX(), pos.getZ(), pos.getX(), pos.getZ()))
+				for (StructureComponent component : start.getComponents())
+					if (component.getBoundingBox().isVecInside(pos))
+						if (component instanceof StructureTFComponent)
+							return ((StructureTFComponent) component).getFeatureType();
+		return TFFeature.nothing;
 	}
 
 	/**
